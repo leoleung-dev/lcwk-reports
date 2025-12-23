@@ -46,6 +46,40 @@
   box-shadow: 0 10px 24px var(--shadow);
 }
 
+.monthTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(255, 250, 242, 0.6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 26px var(--shadow);
+}
+
+.monthTab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.monthTabActive {
+  background: var(--accent-strong);
+  color: white;
+  border-color: rgba(122, 63, 30, 0.4);
+  box-shadow: 0 10px 18px rgba(122, 63, 30, 0.25);
+}
+
+.headerActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
 .yearLink {
   color: var(--accent-strong);
   font-weight: 600;
@@ -77,6 +111,16 @@
 }
 
 .metricButton {
+  border: 1px solid rgba(163, 91, 42, 0.35);
+  background: rgba(163, 91, 42, 0.08);
+  color: var(--accent-strong);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.exportButton {
   border: 1px solid rgba(163, 91, 42, 0.35);
   background: rgba(163, 91, 42, 0.08);
   color: var(--accent-strong);
@@ -387,6 +431,11 @@
     grid-template-columns: repeat(6, minmax(0, 1fr));
     row-gap: 16px;
   }
+
+  .headerActions {
+    width: 100%;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 600px) {
@@ -402,5 +451,17 @@
   .tableWrap td {
     padding: 10px 12px;
     font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .monthTabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 6px 8px;
+  }
+
+  .monthTab {
+    white-space: nowrap;
   }
 }

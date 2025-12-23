@@ -3,6 +3,28 @@
 Annual reporting dashboard for LCWK. The first report lives at `/sales` with
 monthly entry, reference generation, and Excel export.
 
+## Overview
+
+LCWK Reports is a Next.js app that hosts two annual report workflows:
+- Sales (`/sales/{year}`): monthly entries, reference generation, and exports.
+- Commission (`/commission/{year}`): handler-based commission tracking with exports.
+
+Summary pages provide annual charts, tables, and year-level exports. Admin pages
+let staff manage the services and handlers catalogs.
+
+## Tech stack
+
+- Next.js App Router (React, Node runtime for API routes)
+- Postgres (Neon) via `pg`
+- Excel export via `xlsx`
+- CSS Modules for styling
+- Vercel for deployment
+
+## Documentation
+
+Detailed per-file documentation lives in `documentations/`, with an overview in
+`documentations/overview.md`.
+
 ## Setup
 
 1. Install dependencies:

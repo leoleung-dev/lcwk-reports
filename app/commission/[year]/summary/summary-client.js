@@ -19,6 +19,22 @@ const monthLabels = [
   "Dec",
 ];
 
+const monthTabs = [
+  { label: "All Year", value: "all" },
+  { label: "Jan", value: "01" },
+  { label: "Feb", value: "02" },
+  { label: "Mar", value: "03" },
+  { label: "Apr", value: "04" },
+  { label: "May", value: "05" },
+  { label: "Jun", value: "06" },
+  { label: "Jul", value: "07" },
+  { label: "Aug", value: "08" },
+  { label: "Sep", value: "09" },
+  { label: "Oct", value: "10" },
+  { label: "Nov", value: "11" },
+  { label: "Dec", value: "12" },
+];
+
 const palette = [
   "#a35b2a",
   "#ce8a52",
@@ -47,6 +63,15 @@ function formatMoney(value) {
   }
   const amount = Number(value || 0);
   return `$${moneyFormatter.format(amount)}`;
+}
+
+function formatPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) {
+    return "0%";
+  }
+  const scaled = percent * 100;
+  return `${scaled.toFixed(1).replace(/\.0$/, "")}%`;
 }
 
 export default function SummaryClient({ year: yearProp }) {
@@ -135,7 +160,9 @@ export default function SummaryClient({ year: yearProp }) {
           : dataMaps.totalsByHandlerMonth[handler]?.[pieMonth] || 0;
       return { handler, total };
     });
-    return entries.filter((entry) => entry.total > 0);
+    return entries
+      .filter((entry) => entry.total > 0)
+      .sort((a, b) => b.total - a.total);
   }, [handlers, pieMonth, dataMaps]);
 
   const pieTotal = useMemo(() => {
@@ -159,6 +186,10 @@ export default function SummaryClient({ year: yearProp }) {
       background: `conic-gradient(${segments.join(", ")})`,
     };
   }, [pieData, pieTotal]);
+
+  function handleExportYear() {
+    window.location.href = `/api/commission/export?year=${year}`;
+  }
 
   useEffect(() => {
     async function loadSummary() {
@@ -197,14 +228,23 @@ export default function SummaryClient({ year: yearProp }) {
           <h1>{year} Commission Summary</h1>
           <p>Commission totals and case counts across all handlers.</p>
         </div>
-        <div className={styles.yearNav}>
-          <Link className={styles.yearLink} href={`/commission/${Number(year) - 1}/summary`}>
-            ← {Number(year) - 1}
-          </Link>
-          <div className={styles.yearBadge}>{year}</div>
-          <Link className={styles.yearLink} href={`/commission/${Number(year) + 1}/summary`}>
-            {Number(year) + 1} →
-          </Link>
+        <div className={styles.headerActions}>
+          <div className={styles.yearNav}>
+            <Link className={styles.yearLink} href={`/commission/${Number(year) - 1}/summary`}>
+              ← {Number(year) - 1}
+            </Link>
+            <div className={styles.yearBadge}>{year}</div>
+            <Link className={styles.yearLink} href={`/commission/${Number(year) + 1}/summary`}>
+              {Number(year) + 1} →
+            </Link>
+          </div>
+          <button
+            type="button"
+            className={styles.exportButton}
+            onClick={handleExportYear}
+          >
+            Export year
+          </button>
         </div>
       </header>
 
@@ -231,6 +271,26 @@ export default function SummaryClient({ year: yearProp }) {
           Commission (Total Commission)
         </button>
       </div>
+
+      <section className={styles.monthTabs}>
+        {monthTabs.map((tab) => {
+          const value =
+            tab.value === "all" ? "all" : `${year}-${tab.value}`;
+          const isActive = pieMonth === value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              className={`${styles.monthTab} ${
+                isActive ? styles.monthTabActive : ""
+              }`}
+              onClick={() => setPieMonth(value)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </section>
 
       <section className={styles.chartsSection}>
         <div className={styles.barCard}>
@@ -300,7 +360,10 @@ export default function SummaryClient({ year: yearProp }) {
                     />
                     <div>
                       <strong>{item.handler}</strong>
-                      <span>{formatMoney(item.total)}</span>
+                      <span>
+                        {formatMoney(item.total)} (
+                        {formatPercent(item.total / (pieTotal || 1))})
+                      </span>
                     </div>
                   </div>
                 ))

@@ -19,6 +19,22 @@ const monthLabels = [
   "Dec",
 ];
 
+const monthTabs = [
+  { label: "All Year", value: "all" },
+  { label: "Jan", value: "01" },
+  { label: "Feb", value: "02" },
+  { label: "Mar", value: "03" },
+  { label: "Apr", value: "04" },
+  { label: "May", value: "05" },
+  { label: "Jun", value: "06" },
+  { label: "Jul", value: "07" },
+  { label: "Aug", value: "08" },
+  { label: "Sep", value: "09" },
+  { label: "Oct", value: "10" },
+  { label: "Nov", value: "11" },
+  { label: "Dec", value: "12" },
+];
+
 const palette = [
   "#a35b2a",
   "#ce8a52",
@@ -42,6 +58,15 @@ function formatMoney(value) {
   return `$${moneyFormatter.format(amount)}`;
 }
 
+function formatPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) {
+    return "0%";
+  }
+  const scaled = percent * 100;
+  return `${scaled.toFixed(1).replace(/\.0$/, "")}%`;
+}
+
 function isValidYear(value) {
   return /^\d{4}$/.test(value || "");
 }
@@ -54,24 +79,16 @@ function formatDate(value) {
   return text.includes("T") ? text.split("T")[0] : text;
 }
 
-function getInitialMonth(year) {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const current = `${now.getFullYear()}-${month}`;
-  if (current.startsWith(`${year}-`)) {
-    return current;
-  }
-  return `${year}-01`;
-}
-
 export default function SummaryClient({ year: yearProp }) {
   const nowYear = new Date().getFullYear();
   const year = isValidYear(yearProp) ? yearProp : String(nowYear);
   const [months, setMonths] = useState([]);
   const [entries, setEntries] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(getInitialMonth(year));
+  const [selectedMonth, setSelectedMonth] = useState("all");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
+
+  const selectedLabel = selectedMonth === "all" ? "All Year" : selectedMonth;
 
   const maxTotal = useMemo(() => {
     return months.reduce((max, item) => Math.max(max, item.total || 0), 0);
@@ -83,10 +100,12 @@ export default function SummaryClient({ year: yearProp }) {
       acc[key] = (acc[key] || 0) + Number(entry.cost_hkd || 0);
       return acc;
     }, {});
-    return Object.entries(totals).map(([name, total]) => ({
-      name,
-      total,
-    }));
+    return Object.entries(totals)
+      .map(([name, total]) => ({
+        name,
+        total,
+      }))
+      .sort((a, b) => b.total - a.total);
   }, [entries]);
 
   const pieTotal = useMemo(() => {
@@ -111,15 +130,20 @@ export default function SummaryClient({ year: yearProp }) {
     };
   }, [pieTotal, serviceBreakdown]);
 
-  function handleExportMonth() {
-    if (!selectedMonth) {
+  function handleExportSelection() {
+    if (!selectedMonth || selectedMonth === "all") {
+      window.location.href = `/api/sales/export?year=${year}`;
       return;
     }
     window.location.href = `/api/sales/export?month=${selectedMonth}`;
   }
 
+  function handleExportYear() {
+    window.location.href = `/api/sales/export?year=${year}`;
+  }
+
   useEffect(() => {
-    setSelectedMonth(getInitialMonth(year));
+    setSelectedMonth("all");
     setMonths([]);
     setEntries([]);
   }, [year]);
@@ -153,7 +177,10 @@ export default function SummaryClient({ year: yearProp }) {
       setLoading(true);
       setStatus("");
       try {
-        const response = await fetch(`/api/sales?month=${selectedMonth}`);
+        const response =
+          selectedMonth === "all"
+            ? await fetch(`/api/sales?year=${year}`)
+            : await fetch(`/api/sales?month=${selectedMonth}`);
         const data = await response.json();
         if (!response.ok) {
           throw new Error(data.error || "Unable to load month entries.");
@@ -173,6 +200,9 @@ export default function SummaryClient({ year: yearProp }) {
     if (months.length === 0) {
       return;
     }
+    if (selectedMonth === "all") {
+      return;
+    }
     const existing = months.find((item) => item.month === selectedMonth);
     if (!existing) {
       setSelectedMonth(months[0]?.month || "");
@@ -189,19 +219,48 @@ export default function SummaryClient({ year: yearProp }) {
           <h1>Annual Summary {year}</h1>
           <p>Monthly totals, service breakdown, and detailed entries.</p>
         </div>
-        <div className={styles.yearNav}>
-          <Link className={styles.yearLink} href={`/sales/${Number(year) - 1}/summary`}>
-            ← {Number(year) - 1}
-          </Link>
-          <div className={styles.yearBadge}>{year}</div>
-          <Link className={styles.yearLink} href={`/sales/${Number(year) + 1}/summary`}>
-            {Number(year) + 1} →
-          </Link>
+        <div className={styles.headerActions}>
+          <div className={styles.yearNav}>
+            <Link className={styles.yearLink} href={`/sales/${Number(year) - 1}/summary`}>
+              ← {Number(year) - 1}
+            </Link>
+            <div className={styles.yearBadge}>{year}</div>
+            <Link className={styles.yearLink} href={`/sales/${Number(year) + 1}/summary`}>
+              {Number(year) + 1} →
+            </Link>
+          </div>
+          <button
+            type="button"
+            className={styles.exportButton}
+            onClick={handleExportYear}
+          >
+            Export year
+          </button>
         </div>
       </header>
 
       {loading ? <div className={styles.loading}>Loading…</div> : null}
       {status ? <p className={styles.status}>{status}</p> : null}
+
+      <section className={styles.monthTabs}>
+        {monthTabs.map((tab) => {
+          const value =
+            tab.value === "all" ? "all" : `${year}-${tab.value}`;
+          const isActive = selectedMonth === value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              className={`${styles.monthTab} ${
+                isActive ? styles.monthTabActive : ""
+              }`}
+              onClick={() => setSelectedMonth(value)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </section>
 
       <section className={styles.chartSection}>
         <div className={styles.barCard}>
@@ -239,7 +298,7 @@ export default function SummaryClient({ year: yearProp }) {
 
         <div className={styles.pieCard}>
           <div className={styles.barHeader}>
-            <h2>Service mix ({selectedMonth})</h2>
+            <h2>Service mix ({selectedLabel})</h2>
             <span>{formatMoney(pieTotal)}</span>
           </div>
           <div className={styles.pieLayout}>
@@ -258,7 +317,10 @@ export default function SummaryClient({ year: yearProp }) {
                     />
                     <div>
                       <strong>{item.name}</strong>
-                      <span>{formatMoney(item.total)}</span>
+                      <span>
+                        {formatMoney(item.total)} (
+                        {formatPercent(item.total / (pieTotal || 1))})
+                      </span>
                     </div>
                   </div>
                 ))
@@ -270,15 +332,15 @@ export default function SummaryClient({ year: yearProp }) {
 
       <section className={styles.tableSection}>
         <div className={styles.tableHeader}>
-          <h2>Entries for {selectedMonth}</h2>
+          <h2>Entries for {selectedLabel}</h2>
           <div className={styles.tableMeta}>
             <span>{entries.length} entries</span>
             <button
               type="button"
               className={styles.exportButton}
-              onClick={handleExportMonth}
+              onClick={handleExportSelection}
             >
-              Export month
+              {selectedMonth === "all" ? "Export year" : "Export month"}
             </button>
           </div>
         </div>

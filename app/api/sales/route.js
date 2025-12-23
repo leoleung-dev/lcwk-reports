@@ -8,6 +8,10 @@ function isValidMonth(value) {
   return /^\d{4}-\d{2}$/.test(value || "");
 }
 
+function isValidYear(value) {
+  return /^\d{4}$/.test(value || "");
+}
+
 function isValidDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) {
     return false;
@@ -24,30 +28,60 @@ function monthToKey(monthValue) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month");
-
-  if (!isValidMonth(month)) {
-    return NextResponse.json(
-      { error: "Valid month is required in YYYY-MM format." },
-      { status: 400 }
-    );
-  }
-
-  const entryMonth = monthToKey(month);
+  const year = searchParams.get("year");
 
   try {
-    const entries = await query(
-      `SELECT se.id,
-        se.entry_date,
-        se.reference,
-        se.client_name,
-        se.cost_hkd,
-        s.name AS service
-       FROM sales_entries se
-       JOIN services s ON s.id = se.service_id
-       WHERE se.entry_month = $1
-       ORDER BY se.entry_date ASC, se.entry_seq ASC`,
-      [entryMonth]
-    );
+    let entries = [];
+    if (month) {
+      if (!isValidMonth(month)) {
+        return NextResponse.json(
+          { error: "Valid month is required in YYYY-MM format." },
+          { status: 400 }
+        );
+      }
+      const entryMonth = monthToKey(month);
+      entries = await query(
+        `SELECT se.id,
+          se.entry_date,
+          se.reference,
+          se.client_name,
+          se.cost_hkd,
+          s.name AS service
+         FROM sales_entries se
+         JOIN services s ON s.id = se.service_id
+         WHERE se.entry_month = $1
+         ORDER BY se.entry_date ASC, se.entry_seq ASC`,
+        [entryMonth]
+      );
+    } else if (year) {
+      if (!isValidYear(year)) {
+        return NextResponse.json(
+          { error: "Valid year is required in YYYY format." },
+          { status: 400 }
+        );
+      }
+      const yearKey = year.slice(2);
+      const start = `${yearKey}01`;
+      const end = `${yearKey}12`;
+      entries = await query(
+        `SELECT se.id,
+          se.entry_date,
+          se.reference,
+          se.client_name,
+          se.cost_hkd,
+          s.name AS service
+         FROM sales_entries se
+         JOIN services s ON s.id = se.service_id
+         WHERE se.entry_month BETWEEN $1 AND $2
+         ORDER BY se.entry_date ASC, se.entry_seq ASC`,
+        [start, end]
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Month or year is required." },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({ entries });
   } catch (error) {

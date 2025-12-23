@@ -1,0 +1,22 @@
+# app/api/services/route.js
+
+## Purpose
+API for reading and creating service catalog entries used by sales.
+
+## Exports
+- `GET()`
+- `POST(request)`
+
+## Functions
+- `GET()`
+  - Purpose: Return all active services.
+  - Behavior: Queries `services` for `is_active = true` and sorts by name.
+  - Usage: Called by sales forms and the services admin page.
+  - Response: `{ services: [{ id, name }] }` or `{ error }` with 500.
+
+- `POST(request)`
+  - Purpose: Create or upsert a service by name.
+  - Behavior: Validates the `name` field, inserts into `services`, and returns the new record. Uses `ON CONFLICT` to avoid duplicates.
+  - Usage: Called when staff add a new service or type a new service in the sales form.
+  - Request body: `{ name: string }`
+  - Response: `{ service: { id, name } }` or `{ error }` with 400/500.
