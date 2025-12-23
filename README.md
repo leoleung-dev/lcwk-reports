@@ -59,4 +59,4 @@ Open http://localhost:3000
 - `/commission/{year}` - Master commission report entry with monthly view.
 - `/admin/services` - Add new services for staff to select.
 - `/admin/handlers` - Add handlers for staff to select.
-- `/api/sales/export` - Excel export endpoint (used by the UI).
+- `/api/sales/export` - Excel export endpoint (used by the UI)
