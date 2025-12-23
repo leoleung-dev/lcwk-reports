@@ -13,7 +13,7 @@
   justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
-  animation: rise 0.5s ease;
+  flex-wrap: wrap;
 }
 
 .header h1 {
@@ -117,10 +117,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  align-items: stretch;
-  animation: rise 0.6s ease;
-  animation-delay: 0.05s;
-  animation-fill-mode: both;
 }
 
 .statCard {
@@ -148,6 +144,7 @@
   text-align: center;
   box-shadow: 0 16px 28px rgba(163, 91, 42, 0.35);
   transition: transform 0.2s ease;
+  border: none;
 }
 
 .exportButton:hover {
@@ -160,9 +157,6 @@
   border-radius: calc(var(--radius) + 6px);
   padding: 24px;
   box-shadow: 0 20px 40px var(--shadow);
-  animation: rise 0.65s ease;
-  animation-delay: 0.1s;
-  animation-fill-mode: both;
 }
 
 .bulkPanel {
@@ -215,14 +209,6 @@
   font-size: 1.4rem;
 }
 
-.reference {
-  font-weight: 600;
-  color: var(--accent-strong);
-  background: rgba(163, 91, 42, 0.12);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
 .form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -237,8 +223,7 @@
   color: var(--muted);
 }
 
-.form input,
-.form select {
+.form input {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 10px 12px;
@@ -246,80 +231,23 @@
   color: var(--ink);
 }
 
-.servicePicker {
+.summaryField {
   display: flex;
   flex-direction: column;
-}
-
-.serviceInputRow {
-  display: flex;
   gap: 8px;
-  align-items: stretch;
-}
-
-.serviceInputRow input {
-  flex: 1;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: white;
-  color: var(--ink);
-  min-height: 40px;
-}
-
-.serviceToggle {
-  border: 1px solid var(--line);
-  background: white;
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   color: var(--muted);
-  min-height: 40px;
 }
 
-.serviceClear {
-  border: 1px solid rgba(163, 91, 42, 0.3);
-  background: rgba(163, 91, 42, 0.08);
-  color: var(--accent-strong);
-  border-radius: 10px;
-  padding: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  min-height: 40px;
-  width: 40px;
+.valuePill {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-}
-
-.serviceMenu {
-  margin-top: 8px;
-  max-height: 220px;
-  overflow-y: auto;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 18px 34px var(--shadow);
-  z-index: 5;
-  padding: 6px;
-}
-
-.serviceOption {
-  width: 100%;
-  text-align: left;
-  padding: 8px 10px;
-  border-radius: 10px;
-  color: var(--ink);
-}
-
-.serviceOption:hover {
+  padding: 8px 12px;
+  border-radius: 999px;
   background: rgba(163, 91, 42, 0.12);
-}
-
-.serviceEmpty {
-  padding: 8px 10px;
-  color: var(--muted);
-  font-size: 0.85rem;
+  color: var(--accent-strong);
+  font-weight: 600;
+  width: fit-content;
 }
 
 .formActions {
@@ -339,16 +267,10 @@
   box-shadow: 0 14px 30px rgba(122, 63, 30, 0.35);
 }
 
-.primaryButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
 .secondaryButton {
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 12px 18px;
+  padding: 10px 16px;
   color: var(--muted);
 }
 
@@ -358,35 +280,93 @@
   font-weight: 600;
 }
 
-.tableSection {
-  animation: rise 0.7s ease;
-  animation-delay: 0.15s;
-  animation-fill-mode: both;
+.handlerPicker {
+  display: flex;
+  flex-direction: column;
 }
 
-.splitLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
-  gap: 24px;
-  align-items: start;
+.handlerInputRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.handlerInputRow input {
+  flex: 1;
+  min-height: 40px;
+}
+
+.handlerToggle {
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-height: 40px;
+}
+
+.handlerClear {
+  border: 1px solid rgba(163, 91, 42, 0.3);
+  background: rgba(163, 91, 42, 0.08);
+  color: var(--accent-strong);
+  border-radius: 10px;
+  padding: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-height: 40px;
+  width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.handlerMenu {
+  margin-top: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 34px var(--shadow);
+  z-index: 5;
+  padding: 6px;
+}
+
+.handlerOption {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--ink);
+}
+
+.handlerOption:hover {
+  background: rgba(163, 91, 42, 0.12);
+}
+
+.handlerEmpty {
+  padding: 8px 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .tableHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .tableHeader h2 {
   font-family: "Spectral", "Times New Roman", serif;
-}
-
-.tableNote {
-  font-size: 0.9rem;
-  color: var(--muted);
 }
 
 .tableWrap {
@@ -400,7 +380,7 @@
 .tableWrap table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 640px;
+  min-width: 720px;
 }
 
 .tableWrap th,
@@ -416,37 +396,6 @@
   font-weight: 600;
 }
 
-.thContent {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.sortButton {
-  border: 1px solid var(--line);
-  background: white;
-  border-radius: 999px;
-  padding: 6px 8px;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  color: var(--muted);
-}
-
-.sortActive {
-  background: var(--accent-strong);
-  color: white;
-  border-color: var(--accent-strong);
-}
-
-.actionsColumn {
-  width: 72px;
-  text-align: center;
-}
-
 .editButton {
   border: 1px solid var(--line);
   background: white;
@@ -456,6 +405,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px;
 }
 
 .modalOverlay {
@@ -557,14 +512,11 @@
   backdrop-filter: blur(2px);
 }
 
-.loadingScreen {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-weight: 600;
-  color: var(--accent-strong);
+.splitLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
+  gap: 24px;
+  align-items: start;
 }
 
 .spinner {
@@ -574,32 +526,6 @@
   border: 3px solid rgba(163, 91, 42, 0.2);
   border-top-color: var(--accent-strong);
   animation: spin 0.8s linear infinite;
-}
-
-.amount {
-  text-align: right;
-}
-
-.referenceChip {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(163, 91, 42, 0.1);
-  font-weight: 600;
-  color: var(--accent-strong);
-}
-
-.serviceChip {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(45, 39, 28, 0.08);
-}
-
-.empty {
-  text-align: center;
-  color: var(--muted);
-  padding: 28px;
 }
 
 .mobileList {
@@ -637,17 +563,6 @@
   color: var(--muted);
 }
 
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -655,18 +570,9 @@
 }
 
 @media (max-width: 720px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
   .yearNav {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .monthTabs {
-    gap: 8px;
   }
 
   .splitLayout {
@@ -706,17 +612,17 @@
     grid-template-columns: 1fr;
   }
 
-  .serviceInputRow {
+  .handlerInputRow {
     flex-wrap: nowrap;
   }
 
-  .serviceInputRow input {
+  .handlerInputRow input {
     min-width: 0;
     flex: 1 1 auto;
   }
 
-  .serviceClear,
-  .serviceToggle {
+  .handlerClear,
+  .handlerToggle {
     flex: 0 0 auto;
   }
 

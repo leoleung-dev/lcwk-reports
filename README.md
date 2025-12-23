@@ -34,5 +34,7 @@ Open http://localhost:3000
 ## Routes
 
 - `/sales/{year}` - Annual sales report entry + monthly view with month tabs.
+- `/commission/{year}` - Master commission report entry with monthly view.
 - `/admin/services` - Add new services for staff to select.
+- `/admin/handlers` - Add handlers for staff to select.
 - `/api/sales/export` - Excel export endpoint (used by the UI).

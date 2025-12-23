@@ -23,3 +23,27 @@ CREATE INDEX IF NOT EXISTS idx_sales_entries_month
 
 CREATE INDEX IF NOT EXISTS idx_sales_entries_date
   ON sales_entries (entry_date);
+
+CREATE TABLE IF NOT EXISTS commission_handlers (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS commission_entries (
+  id BIGSERIAL PRIMARY KEY,
+  entry_month CHAR(4) NOT NULL,
+  client_name TEXT NOT NULL,
+  handler_id BIGINT NOT NULL REFERENCES commission_handlers(id),
+  item_shroud NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  item_quilt NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  item_other NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  total NUMERIC(12, 2) NOT NULL,
+  commission_rate NUMERIC(5, 4) NOT NULL,
+  total_commission NUMERIC(12, 2) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_commission_entries_month
+  ON commission_entries (entry_month);

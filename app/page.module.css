@@ -97,3 +97,18 @@
     padding: 60px 6vw 80px;
   }
 }
+
+@media (max-width: 480px) {
+  .page {
+    padding: 48px 6vw 64px;
+    gap: 32px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 8vw, 2.6rem);
+  }
+
+  .card {
+    min-height: unset;
+  }
+}

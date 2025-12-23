@@ -22,13 +22,13 @@ export default function Home() {
           <span className={styles.cta}>Open report</span>
         </Link>
 
-        <div className={`${styles.card} ${styles.cardMuted}`}>
+        <Link className={styles.card} href="/commission">
           <div>
             <h2>佣金登記 · Master Commission</h2>
-            <p>Coming next. We will add this report after sales.</p>
+            <p>Track commission entries and totals by month.</p>
           </div>
-          <span className={styles.ctaMuted}>In progress</span>
-        </div>
+          <span className={styles.cta}>Open report</span>
+        </Link>
       </section>
     </main>
   );

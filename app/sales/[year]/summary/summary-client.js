@@ -32,10 +32,15 @@ const palette = [
   "#b07d62",
 ];
 
-const currencyFormatter = new Intl.NumberFormat("en-HK", {
-  style: "currency",
-  currency: "HKD",
+const moneyFormatter = new Intl.NumberFormat("en-HK", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
+
+function formatMoney(value) {
+  const amount = Number(value || 0);
+  return `$${moneyFormatter.format(amount)}`;
+}
 
 function isValidYear(value) {
   return /^\d{4}$/.test(value || "");
@@ -218,15 +223,13 @@ export default function SummaryClient({ year: yearProp }) {
                     isActive ? styles.barActive : ""
                   }`}
                   onClick={() => setSelectedMonth(item.month)}
-                  title={`${item.month}: ${currencyFormatter.format(item.total)}`}
-                  aria-label={`${item.month} total ${currencyFormatter.format(
-                    item.total
-                  )}`}
+                  title={`${item.month}: ${formatMoney(item.total)}`}
+                  aria-label={`${item.month} total ${formatMoney(item.total)}`}
                 >
                   <span className={styles.barFill} style={{ height: `${height}%` }} />
                   <span className={styles.barLabel}>{monthLabels[index]}</span>
                   <span className={styles.barTooltip}>
-                    {currencyFormatter.format(item.total)}
+                    {formatMoney(item.total)}
                   </span>
                 </button>
               );
@@ -237,7 +240,7 @@ export default function SummaryClient({ year: yearProp }) {
         <div className={styles.pieCard}>
           <div className={styles.barHeader}>
             <h2>Service mix ({selectedMonth})</h2>
-            <span>{currencyFormatter.format(pieTotal)}</span>
+            <span>{formatMoney(pieTotal)}</span>
           </div>
           <div className={styles.pieLayout}>
             <div className={styles.pieChart} style={pieStyle}>
@@ -255,7 +258,7 @@ export default function SummaryClient({ year: yearProp }) {
                     />
                     <div>
                       <strong>{item.name}</strong>
-                      <span>{currencyFormatter.format(item.total)}</span>
+                      <span>{formatMoney(item.total)}</span>
                     </div>
                   </div>
                 ))
@@ -305,7 +308,7 @@ export default function SummaryClient({ year: yearProp }) {
                     <td>{entry.client_name}</td>
                     <td>{entry.service}</td>
                     <td className={styles.amount}>
-                      {currencyFormatter.format(Number(entry.cost_hkd || 0))}
+                      {formatMoney(Number(entry.cost_hkd || 0))}
                     </td>
                   </tr>
                 ))

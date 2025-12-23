@@ -16,10 +16,15 @@ import styles from "../Sales.module.css";
 let cachedServices = null;
 const entriesCache = new Map();
 
-const currencyFormatter = new Intl.NumberFormat("en-HK", {
-  style: "currency",
-  currency: "HKD",
+const moneyFormatter = new Intl.NumberFormat("en-HK", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
+
+function formatMoney(value) {
+  const amount = Number(value || 0);
+  return `$${moneyFormatter.format(amount)}`;
+}
 
 const monthTabs = [
   { label: "Jan", value: "01" },
@@ -774,135 +779,11 @@ export default function SalesClient({ year: yearProp }) {
         </div>
         <div className={styles.statCard}>
           <span className={styles.statLabel}>Monthly Total</span>
-          <strong>{currencyFormatter.format(total)}</strong>
+          <strong>{formatMoney(total)}</strong>
         </div>
         <button className={styles.exportButton} onClick={handleExport}>
           Export Excel
         </button>
-      </section>
-
-      <section className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <h2>New sales entry</h2>
-          <span className={styles.reference}>Ref: {reference}</span>
-        </div>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <label>
-            Date
-            <input
-              type="date"
-              value={entryDate}
-              min={`${year}-01-01`}
-              max={`${year}-12-31`}
-              onChange={(event) => {
-                const nextDate = event.target.value;
-                setEntryDate(nextDate);
-                if (nextDate && nextDate.slice(0, 7) !== month) {
-                  setMonth(nextDate.slice(0, 7));
-                }
-              }}
-              required
-            />
-          </label>
-          <label>
-            Reference
-            <input type="text" value={reference} readOnly />
-          </label>
-          <label>
-            Client name
-            <input
-              type="text"
-              value={clientName}
-              onChange={(event) => setClientName(event.target.value)}
-              placeholder="Client name"
-              required
-            />
-          </label>
-          <label>
-            Service
-            <div className={styles.servicePicker} ref={serviceMenuRef}>
-              <div className={styles.serviceInputRow}>
-                <input
-                  ref={serviceInputRef}
-                  type="text"
-                  value={serviceName}
-                  onChange={(event) => {
-                    setServiceName(event.target.value);
-                    setServiceMenuOpen(true);
-                  }}
-                  onFocus={() => setServiceMenuOpen(true)}
-                  placeholder="Start typing or select"
-                  required
-                />
-                {serviceName ? (
-                  <button
-                    type="button"
-                    className={styles.serviceClear}
-                    onClick={() => {
-                      setServiceName("");
-                      serviceInputRef.current?.focus();
-                    }}
-                    aria-label="Clear service"
-                  >
-                    ×
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className={styles.serviceToggle}
-                  onClick={() => setServiceMenuOpen((prev) => !prev)}
-                  aria-label="Toggle services list"
-                >
-                  ▾
-                </button>
-              </div>
-              {serviceMenuOpen ? (
-                <div className={styles.serviceMenu}>
-                  {filteredServices.length === 0 ? (
-                    <div className={styles.serviceEmpty}>
-                      No matching services.
-                    </div>
-                  ) : (
-                    filteredServices.map((service) => (
-                      <button
-                        key={service.id}
-                        type="button"
-                        className={styles.serviceOption}
-                        onClick={() => {
-                          setServiceName(service.name);
-                          setServiceMenuOpen(false);
-                        }}
-                      >
-                        {service.name}
-                      </button>
-                    ))
-                  )}
-                </div>
-              ) : null}
-            </div>
-          </label>
-          <label>
-            Cost (HKD)
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={costHkd}
-              onChange={(event) => setCostHkd(event.target.value)}
-              placeholder="0.00"
-              required
-            />
-          </label>
-          <div className={styles.formActions}>
-            <button className={styles.primaryButton} disabled={loading}>
-              {loading ? "Saving..." : "Save entry"}
-            </button>
-            <Link className={styles.secondaryButton} href="/admin/services">
-              Manage services
-            </Link>
-          </div>
-        </form>
-        {status ? <p className={styles.status}>{status}</p> : null}
       </section>
 
       {bulkEnabled ? (
@@ -942,123 +823,291 @@ export default function SalesClient({ year: yearProp }) {
         </section>
       ) : null}
 
-      <section className={styles.tableSection}>
-        <div className={styles.tableHeader}>
-          <h2>Entries for {month}</h2>
-          <span className={styles.tableNote}>
-            Reference format: 001/{month.slice(2).replace("-", "")}
-          </span>
-        </div>
-        <div className={styles.tableWrap}>
-          <table>
-            <thead>
-              <tr>
-                <th>
-                  <div className={styles.thContent}>
-                    <span>Date</span>
+      <div className={styles.splitLayout}>
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h2>New sales entry</h2>
+            <span className={styles.reference}>Ref: {reference}</span>
+          </div>
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <label>
+              Date
+              <input
+                type="date"
+                value={entryDate}
+                min={`${year}-01-01`}
+                max={`${year}-12-31`}
+                onChange={(event) => {
+                  const nextDate = event.target.value;
+                  setEntryDate(nextDate);
+                  if (nextDate && nextDate.slice(0, 7) !== month) {
+                    setMonth(nextDate.slice(0, 7));
+                  }
+                }}
+                required
+              />
+            </label>
+            <label>
+              Client name
+              <input
+                type="text"
+                value={clientName}
+                onChange={(event) => setClientName(event.target.value)}
+                placeholder="Client name"
+                required
+              />
+            </label>
+            <label>
+              Service
+              <div className={styles.servicePicker} ref={serviceMenuRef}>
+                <div className={styles.serviceInputRow}>
+                  <input
+                    ref={serviceInputRef}
+                    type="text"
+                    value={serviceName}
+                    onChange={(event) => {
+                      setServiceName(event.target.value);
+                      setServiceMenuOpen(true);
+                    }}
+                    onFocus={() => setServiceMenuOpen(true)}
+                    placeholder="Start typing or select"
+                    required
+                  />
+                  {serviceName ? (
                     <button
                       type="button"
-                      className={`${styles.sortButton} ${
-                        sortConfig.key === "entry_date" ? styles.sortActive : ""
-                      }`}
-                      onClick={() => handleSortClick("entry_date")}
-                      aria-label="Sort date"
+                      className={styles.serviceClear}
+                      onClick={() => {
+                        setServiceName("");
+                        serviceInputRef.current?.focus();
+                      }}
+                      aria-label="Clear service"
                     >
-                      {(() => {
-                        const Icon = getSortIcon("entry_date", "numeric");
-                        return <Icon aria-hidden />;
-                      })()}
+                      ×
                     </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className={styles.serviceToggle}
+                    onClick={() => setServiceMenuOpen((prev) => !prev)}
+                    aria-label="Toggle services list"
+                  >
+                    ▾
+                  </button>
+                </div>
+                {serviceMenuOpen ? (
+                  <div className={styles.serviceMenu}>
+                    {filteredServices.length === 0 ? (
+                      <div className={styles.serviceEmpty}>
+                        No matching services.
+                      </div>
+                    ) : (
+                      filteredServices.map((service) => (
+                        <button
+                          key={service.id}
+                          type="button"
+                          className={styles.serviceOption}
+                          onClick={() => {
+                            setServiceName(service.name);
+                            setServiceMenuOpen(false);
+                          }}
+                        >
+                          {service.name}
+                        </button>
+                      ))
+                    )}
                   </div>
-                </th>
-                <th>
-                  <div className={styles.thContent}>
-                    <span>Reference</span>
-                    <button
-                      type="button"
-                      className={`${styles.sortButton} ${
-                        sortConfig.key === "reference" ? styles.sortActive : ""
-                      }`}
-                      onClick={() => handleSortClick("reference")}
-                      aria-label="Sort reference"
-                    >
-                      {(() => {
-                        const Icon = getSortIcon("reference", "numeric");
-                        return <Icon aria-hidden />;
-                      })()}
-                    </button>
-                  </div>
-                </th>
-                <th>
-                  <div className={styles.thContent}>
-                    <span>Client name</span>
-                    <button
-                      type="button"
-                      className={`${styles.sortButton} ${
-                        sortConfig.key === "client_name" ? styles.sortActive : ""
-                      }`}
-                      onClick={() => handleSortClick("client_name")}
-                      aria-label="Sort client name"
-                    >
-                      {(() => {
-                        const Icon = getSortIcon("client_name", "alpha");
-                        return <Icon aria-hidden />;
-                      })()}
-                    </button>
-                  </div>
-                </th>
-                <th>
-                  <div className={styles.thContent}>
-                    <span>Service</span>
-                  </div>
-                </th>
-                <th className={styles.amount}>
-                  <div className={styles.thContent}>
-                    <span>Cost</span>
-                    <button
-                      type="button"
-                      className={`${styles.sortButton} ${
-                        sortConfig.key === "cost_hkd" ? styles.sortActive : ""
-                      }`}
-                      onClick={() => handleSortClick("cost_hkd")}
-                      aria-label="Sort cost"
-                    >
-                      {(() => {
-                        const Icon = getSortIcon("cost_hkd", "numeric");
-                        return <Icon aria-hidden />;
-                      })()}
-                    </button>
-                  </div>
-                </th>
-                <th className={styles.actionsColumn}>Edit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {entries.length === 0 ? (
+                ) : null}
+              </div>
+            </label>
+            <label>
+              Cost (HKD)
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={costHkd}
+                onChange={(event) => setCostHkd(event.target.value)}
+                placeholder="0.00"
+                required
+              />
+            </label>
+            <div className={styles.formActions}>
+              <button className={styles.primaryButton} disabled={loading}>
+                {loading ? "Saving..." : "Save entry"}
+              </button>
+            </div>
+          </form>
+          {status ? <p className={styles.status}>{status}</p> : null}
+        </section>
+
+        <section className={styles.tableSection}>
+          <div className={styles.tableHeader}>
+            <h2>Entries for {month}</h2>
+            <span className={styles.tableNote}>
+              Reference format: 001/{month.slice(2).replace("-", "")}
+            </span>
+          </div>
+          <div className={styles.tableWrap}>
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="5" className={styles.empty}>
-                    No entries yet for this month.
-                  </td>
+                  <th>
+                    <div className={styles.thContent}>
+                      <span>Date</span>
+                      <button
+                        type="button"
+                        className={`${styles.sortButton} ${
+                          sortConfig.key === "entry_date" ? styles.sortActive : ""
+                        }`}
+                        onClick={() => handleSortClick("entry_date")}
+                        aria-label="Sort date"
+                      >
+                        {(() => {
+                          const Icon = getSortIcon("entry_date", "numeric");
+                          return <Icon aria-hidden />;
+                        })()}
+                      </button>
+                    </div>
+                  </th>
+                  <th>
+                    <div className={styles.thContent}>
+                      <span>Reference</span>
+                      <button
+                        type="button"
+                        className={`${styles.sortButton} ${
+                          sortConfig.key === "reference" ? styles.sortActive : ""
+                        }`}
+                        onClick={() => handleSortClick("reference")}
+                        aria-label="Sort reference"
+                      >
+                        {(() => {
+                          const Icon = getSortIcon("reference", "numeric");
+                          return <Icon aria-hidden />;
+                        })()}
+                      </button>
+                    </div>
+                  </th>
+                  <th>
+                    <div className={styles.thContent}>
+                      <span>Client name</span>
+                      <button
+                        type="button"
+                        className={`${styles.sortButton} ${
+                          sortConfig.key === "client_name" ? styles.sortActive : ""
+                        }`}
+                        onClick={() => handleSortClick("client_name")}
+                        aria-label="Sort client name"
+                      >
+                        {(() => {
+                          const Icon = getSortIcon("client_name", "alpha");
+                          return <Icon aria-hidden />;
+                        })()}
+                      </button>
+                    </div>
+                  </th>
+                  <th>
+                    <div className={styles.thContent}>
+                      <span>Service</span>
+                    </div>
+                  </th>
+                  <th className={styles.amount}>
+                    <div className={styles.thContent}>
+                      <span>Cost</span>
+                      <button
+                        type="button"
+                        className={`${styles.sortButton} ${
+                          sortConfig.key === "cost_hkd" ? styles.sortActive : ""
+                        }`}
+                        onClick={() => handleSortClick("cost_hkd")}
+                        aria-label="Sort cost"
+                      >
+                        {(() => {
+                          const Icon = getSortIcon("cost_hkd", "numeric");
+                          return <Icon aria-hidden />;
+                        })()}
+                      </button>
+                    </div>
+                  </th>
+                  <th className={styles.actionsColumn}>Edit</th>
                 </tr>
-              ) : (
-                sortedEntries.map((entry) => (
-                  <tr key={entry.id}>
-                    <td>{formatDate(entry.entry_date)}</td>
-                    <td>
+              </thead>
+              <tbody>
+                {entries.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className={styles.empty}>
+                      No entries yet for this month.
+                    </td>
+                  </tr>
+                ) : (
+                  sortedEntries.map((entry) => (
+                    <tr key={entry.id}>
+                      <td>{formatDate(entry.entry_date)}</td>
+                      <td>
+                        <span className={styles.referenceChip}>
+                          {entry.reference}
+                        </span>
+                      </td>
+                      <td>{entry.client_name}</td>
+                      <td>
+                        <span className={styles.serviceChip}>
+                          {entry.service}
+                        </span>
+                      </td>
+                      <td className={styles.amount}>
+                      {formatMoney(Number(entry.cost_hkd || 0))}
+                      </td>
+                      <td className={styles.actionsColumn}>
+                        <button
+                          type="button"
+                          className={styles.editButton}
+                          onClick={() => openEdit(entry)}
+                          aria-label="Edit entry"
+                        >
+                          <BsPencilSquare aria-hidden />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div className={styles.mobileList}>
+            {entries.length === 0 ? (
+              <div className={styles.empty}>No entries yet for this month.</div>
+            ) : (
+              sortedEntries.map((entry) => (
+                <div key={entry.id} className={styles.entryCard}>
+                  <div className={styles.cardRow}>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Date</span>
+                      <span>{formatDate(entry.entry_date)}</span>
+                    </div>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Reference</span>
                       <span className={styles.referenceChip}>
                         {entry.reference}
                       </span>
-                    </td>
-                    <td>{entry.client_name}</td>
-                    <td>
+                    </div>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Client</span>
+                      <span>{entry.client_name}</span>
+                    </div>
+                  </div>
+                  <div className={styles.cardRow}>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Service</span>
                       <span className={styles.serviceChip}>
                         {entry.service}
                       </span>
-                    </td>
-                    <td className={styles.amount}>
-                      {currencyFormatter.format(Number(entry.cost_hkd || 0))}
-                    </td>
-                    <td className={styles.actionsColumn}>
+                    </div>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Cost</span>
+                      <span>{formatMoney(Number(entry.cost_hkd || 0))}</span>
+                    </div>
+                    <div className={styles.cardCell}>
+                      <span className={styles.cardLabel}>Edit</span>
                       <button
                         type="button"
                         className={styles.editButton}
@@ -1067,14 +1116,14 @@ export default function SalesClient({ year: yearProp }) {
                       >
                         <BsPencilSquare aria-hidden />
                       </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
 
       {editingEntry ? (
         <div className={styles.modalOverlay}>
