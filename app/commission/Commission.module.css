@@ -1,0 +1,43 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 6vw;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 8px);
+  padding: 40px;
+  box-shadow: 0 24px 50px var(--shadow);
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.backLink {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.card h1 {
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+}
+
+.card p {
+  color: var(--muted);
+}
+
+.cta {
+  align-self: flex-start;
+  background: var(--accent-strong);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-weight: 600;
+  box-shadow: 0 16px 30px rgba(122, 63, 30, 0.35);
+}
