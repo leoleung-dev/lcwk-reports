@@ -5,7 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 
 const handler = NextAuth(authOptions);
 
-async function rateLimitedHandler(request) {
+async function rateLimitedHandler(request, context) {
   const rate = rateLimit(request, { keyPrefix: "auth", limit: 30 });
   if (!rate.allowed) {
     return NextResponse.json(
@@ -17,7 +17,7 @@ async function rateLimitedHandler(request) {
     );
   }
 
-  return handler(request);
+  return handler(request, context);
 }
 
 export { rateLimitedHandler as GET, rateLimitedHandler as POST };

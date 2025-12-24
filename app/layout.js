@@ -1,5 +1,6 @@
 import "./globals.css";
 import Providers from "./providers";
+import TopBar from "./top-bar";
 
 export const metadata = {
   title: "LCWK Reports",
@@ -19,7 +20,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <TopBar />
+          {children}
+        </Providers>
       </body>
     </html>
   );
