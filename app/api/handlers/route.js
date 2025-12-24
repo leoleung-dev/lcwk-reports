@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   try {
     const handlers = await query(
       "SELECT id, name FROM commission_handlers WHERE is_active = true ORDER BY LOWER(name) ASC"
@@ -19,6 +25,11 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   let payload;
   try {
     payload = await request.json();

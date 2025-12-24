@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +15,11 @@ function monthToKey(monthValue) {
 }
 
 export async function GET(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month");
 
@@ -55,6 +61,11 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   let payload;
   try {
     payload = await request.json();
@@ -179,6 +190,11 @@ export async function POST(request) {
 }
 
 export async function PATCH(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   let payload;
   try {
     payload = await request.json();
@@ -312,6 +328,11 @@ export async function PATCH(request) {
 }
 
 export async function DELETE(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   let id = null;
   try {
     const { searchParams } = new URL(request.url);

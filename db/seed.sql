@@ -9,3 +9,7 @@ VALUES
   ('灰盅'),
   ('pink Rose')
 ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO allowed_emails (email, added_by)
+VALUES ('leo.lcwk@gmail.com', 'seed')
+ON CONFLICT (email) DO NOTHING;

@@ -34,6 +34,10 @@ Detailed per-file documentation lives in `documentations/`, with an overview in
 2. Create `.env.local`:
    ```bash
    DATABASE_URL=your_neon_postgres_url
+   GOOGLE_CLIENT_ID=your_google_oauth_client_id
+   GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+   NEXTAUTH_SECRET=your_nextauth_secret
+   AUTHORIZED_EMAILS=leo.lcwk@gmail.com
    ```
 3. Create the database tables by running the SQL in:
    - `db/schema.sql`
@@ -59,4 +63,5 @@ Open http://localhost:3000
 - `/commission/{year}` - Master commission report entry with monthly view.
 - `/admin/services` - Add new services for staff to select.
 - `/admin/handlers` - Add handlers for staff to select.
+- `/admin` - Admin hub with access list management.
 - `/api/sales/export` - Excel export endpoint (used by the UI)

@@ -47,3 +47,10 @@ CREATE TABLE IF NOT EXISTS commission_entries (
 
 CREATE INDEX IF NOT EXISTS idx_commission_entries_month
   ON commission_entries (entry_month);
+
+CREATE TABLE IF NOT EXISTS allowed_emails (
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  added_by TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

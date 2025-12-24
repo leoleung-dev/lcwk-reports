@@ -1,5 +1,6 @@
 import { query } from "@/lib/db";
 import * as XLSX from "xlsx";
+import { requireAuth } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,11 @@ function monthKeyToLabel(value) {
 }
 
 export async function GET(request) {
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
   const { searchParams } = new URL(request.url);
   const month = searchParams.get("month");
   const year = searchParams.get("year");

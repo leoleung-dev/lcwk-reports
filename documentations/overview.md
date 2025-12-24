@@ -16,6 +16,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 - `sales_entries`: dated sales records, reference numbers, and cost.
 - `commission_handlers`: catalog used by commission entries.
 - `commission_entries`: monthly commission records with totals and rates.
+- `allowed_emails`: allowlist of Google accounts that can access the app.
 
 ## Runtime flow
 1. Staff choose a month/year in a report page.
@@ -25,6 +26,10 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 
 ## Environment variables
 - `DATABASE_URL`: Neon Postgres connection string.
+- `GOOGLE_CLIENT_ID`: Google OAuth client id for NextAuth.
+- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret for NextAuth.
+- `NEXTAUTH_SECRET`: secret used to sign NextAuth sessions.
+- `AUTHORIZED_EMAILS`: optional comma-separated list of emails allowed to sign in.
 - `NEXT_PUBLIC_SALE_BULK_ENTRY`: toggles sales bulk paste UI.
 - `NEXT_PUBLIC_COMMISSION_BULK_ENTRY`: toggles commission bulk paste UI.
 
