@@ -13,6 +13,18 @@ function formatDate(value) {
   return text.includes("T") ? text.split("T")[0] : text;
 }
 
+function formatDateTime(value) {
+  if (!value) {
+    return "";
+  }
+  const text = String(value);
+  const [datePart, timePart] = text.split("T");
+  if (!timePart) {
+    return datePart;
+  }
+  return `${datePart} ${timePart.split(".")[0]}`;
+}
+
 export default function AccessAdmin() {
   const { data } = useSession();
   const signedInEmail = data?.user?.email || "";
@@ -21,6 +33,9 @@ export default function AccessAdmin() {
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [activity, setActivity] = useState([]);
+  const [activityStatus, setActivityStatus] = useState("");
+  const [activityLoading, setActivityLoading] = useState(false);
 
   async function loadEmails() {
     setLoading(true);
@@ -39,8 +54,26 @@ export default function AccessAdmin() {
     }
   }
 
+  async function loadActivity() {
+    setActivityLoading(true);
+    setActivityStatus("");
+    try {
+      const response = await fetch("/api/auth-audit?limit=50");
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to load activity.");
+      }
+      setActivity(data.attempts || []);
+    } catch (error) {
+      setActivityStatus(error.message || "Unable to load activity.");
+    } finally {
+      setActivityLoading(false);
+    }
+  }
+
   useEffect(() => {
     loadEmails();
+    loadActivity();
   }, []);
 
   async function handleSubmit(event) {
@@ -184,6 +217,56 @@ export default function AccessAdmin() {
                       </button>
                     )}
                   </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className={styles.activity}>
+        <div className={styles.listHeader}>
+          <h2>Login activity</h2>
+          <button
+            className={styles.refresh}
+            type="button"
+            onClick={loadActivity}
+            disabled={activityLoading}
+          >
+            {activityLoading ? "Refreshing..." : "Refresh activity"}
+          </button>
+        </div>
+        {activityStatus ? (
+          <p className={styles.status}>{activityStatus}</p>
+        ) : null}
+        {activity.length === 0 ? (
+          <p className={styles.empty}>No login activity yet.</p>
+        ) : (
+          <div className={styles.activityList}>
+            {activity.map((entry) => {
+              const statusLabel =
+                entry.status === "allowed" ? "Allowed" : "Denied";
+              const statusClass =
+                entry.status === "allowed"
+                  ? styles.statusAllowed
+                  : styles.statusDenied;
+              const meta = [
+                formatDateTime(entry.createdAt),
+                entry.provider || "google",
+                entry.reason || "",
+              ]
+                .filter(Boolean)
+                .join(" | ");
+
+              return (
+                <div key={entry.id} className={styles.activityRow}>
+                  <div>
+                    <p className={styles.emailText}>
+                      {entry.email || "Unknown email"}
+                    </p>
+                    <p className={styles.meta}>{meta}</p>
+                  </div>
+                  <span className={statusClass}>{statusLabel}</span>
                 </div>
               );
             })}

@@ -54,3 +54,15 @@ CREATE TABLE IF NOT EXISTS allowed_emails (
   added_by TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS auth_audit (
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT,
+  status TEXT NOT NULL,
+  provider TEXT,
+  reason TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_audit_created_at
+  ON auth_audit (created_at DESC);

@@ -1,22 +1,8 @@
-"use client";
-
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import styles from "./Login.module.css";
+import LoginClient from "./login-client";
 
-const errorMessages = {
-  AccessDenied: "This Google account is not on the access list.",
-  OAuthSignin: "Unable to start Google sign in.",
-  OAuthCallback: "Google sign in failed. Please try again.",
-  OAuthCreateAccount: "Unable to create a session with Google.",
-  default: "Unable to sign in. Please try again.",
-};
-
-export default function LoginPage() {
-  const searchParams = useSearchParams();
-  const error = searchParams.get("error");
-  const message = error ? errorMessages[error] || errorMessages.default : "";
-
+function LoginFallback() {
   return (
     <main className={styles.page}>
       <section className={styles.card}>
@@ -25,15 +11,18 @@ export default function LoginPage() {
         <p className={styles.subtitle}>
           Use your approved Google account to access internal reports.
         </p>
-        {message ? <p className={styles.error}>{message}</p> : null}
-        <button
-          className={styles.primaryButton}
-          onClick={() => signIn("google", { callbackUrl: "/" })}
-          type="button"
-        >
+        <div className={styles.primaryButton} aria-hidden="true">
           Sign in with Google
-        </button>
+        </div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginClient />
+    </Suspense>
   );
 }

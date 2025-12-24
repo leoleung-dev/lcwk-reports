@@ -17,6 +17,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 - `commission_handlers`: catalog used by commission entries.
 - `commission_entries`: monthly commission records with totals and rates.
 - `allowed_emails`: allowlist of Google accounts that can access the app.
+- `auth_audit`: audit log of sign-in attempts and access outcomes.
 
 ## Runtime flow
 1. Staff choose a month/year in a report page.
