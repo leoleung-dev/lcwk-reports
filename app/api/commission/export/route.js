@@ -1,6 +1,8 @@
+import { NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import * as XLSX from "xlsx";
 import { requireAuth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,6 +28,17 @@ function monthKeyToLabel(value) {
 }
 
 export async function GET(request) {
+  const rate = rateLimit(request, { keyPrefix: "commission-export", limit: 30 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;

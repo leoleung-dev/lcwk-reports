@@ -7,11 +7,23 @@ import {
   removeAllowedEmail,
 } from "@/lib/access-list";
 import { requireAuth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request) {
+  const rate = rateLimit(request, { keyPrefix: "access", limit: 60 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;
@@ -46,6 +58,17 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const rate = rateLimit(request, { keyPrefix: "access-write", limit: 30 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response, email: actorEmail } = await requireAuth();
   if (response) {
     return response;
@@ -78,6 +101,17 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
+  const rate = rateLimit(request, { keyPrefix: "access-write", limit: 30 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;

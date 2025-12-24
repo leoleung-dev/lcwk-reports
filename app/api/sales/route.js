@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getClient, query } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,6 +28,17 @@ function monthToKey(monthValue) {
 }
 
 export async function GET(request) {
+  const rate = rateLimit(request, { keyPrefix: "sales", limit: 120 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;
@@ -99,6 +111,17 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+  const rate = rateLimit(request, { keyPrefix: "sales-write", limit: 60 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;
@@ -220,6 +243,17 @@ export async function POST(request) {
 }
 
 export async function PATCH(request) {
+  const rate = rateLimit(request, { keyPrefix: "sales-write", limit: 60 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;
@@ -370,6 +404,17 @@ export async function PATCH(request) {
 }
 
 export async function DELETE(request) {
+  const rate = rateLimit(request, { keyPrefix: "sales-write", limit: 60 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
   const { response } = await requireAuth();
   if (response) {
     return response;
