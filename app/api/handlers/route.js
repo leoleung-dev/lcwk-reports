@@ -75,7 +75,7 @@ export async function POST(request) {
     const rows = await query(
       `INSERT INTO commission_handlers (name)
        VALUES ($1)
-       ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+       ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name, is_active = true
        RETURNING id, name`,
       [name]
     );
@@ -83,6 +83,67 @@ export async function POST(request) {
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to add handler." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request) {
+  const rate = rateLimit(request, { keyPrefix: "handlers-write", limit: 30 });
+  if (!rate.allowed) {
+    return NextResponse.json(
+      { error: "Too many requests." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rate.retryAfter) },
+      }
+    );
+  }
+
+  const { response } = await requireAuth();
+  if (response) {
+    return response;
+  }
+
+  let id = null;
+  try {
+    const { searchParams } = new URL(request.url);
+    const paramId = searchParams.get("id");
+    if (paramId) {
+      id = Number(paramId);
+    } else {
+      const payload = await request.json();
+      id = Number(payload?.id);
+    }
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Invalid request payload." },
+      { status: 400 }
+    );
+  }
+
+  if (!Number.isFinite(id) || id <= 0) {
+    return NextResponse.json(
+      { error: "Valid handler id is required." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const rows = await query(
+      "UPDATE commission_handlers SET is_active = false WHERE id = $1 AND is_active = true RETURNING id, name",
+      [id]
+    );
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { error: "Handler not found." },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json({ handler: rows[0] }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to remove handler." },
       { status: 500 }
     );
   }

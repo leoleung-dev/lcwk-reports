@@ -13,9 +13,9 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 
 ## Data model at a glance
 - `services`: catalog used by sales entries.
-- `sales_entries`: dated sales records, reference numbers, and cost.
+- `sales_entries`: dated sales records, reference numbers, cost, and the staff email that created each entry.
 - `commission_handlers`: catalog used by commission entries.
-- `commission_entries`: monthly commission records with totals and rates.
+- `commission_entries`: monthly commission records with totals, rates, and the creator email for auditing.
 - `allowed_emails`: allowlist of Google accounts that can access the app.
 - `auth_audit`: audit log of sign-in attempts and access outcomes.
 

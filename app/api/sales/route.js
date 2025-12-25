@@ -64,7 +64,9 @@ export async function GET(request) {
           se.reference,
           se.client_name,
           se.cost_hkd,
-          s.name AS service
+          s.name AS service,
+          se.created_by,
+          se.created_at
          FROM sales_entries se
          JOIN services s ON s.id = se.service_id
          WHERE se.entry_month = $1
@@ -87,7 +89,9 @@ export async function GET(request) {
           se.reference,
           se.client_name,
           se.cost_hkd,
-          s.name AS service
+          s.name AS service,
+          se.created_by,
+          se.created_at
          FROM sales_entries se
          JOIN services s ON s.id = se.service_id
          WHERE se.entry_month BETWEEN $1 AND $2
@@ -122,7 +126,7 @@ export async function POST(request) {
     );
   }
 
-  const { response } = await requireAuth();
+  const { email, response } = await requireAuth();
   if (response) {
     return response;
   }
@@ -192,25 +196,39 @@ export async function POST(request) {
           reference,
           client_name,
           service_id,
-          cost_hkd
+          cost_hkd,
+          created_by
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id,
           entry_date,
           reference,
           client_name,
           cost_hkd,
-          service_id
+          service_id,
+          created_by,
+          created_at
       )
       SELECT inserted.id,
         inserted.entry_date,
         inserted.reference,
         inserted.client_name,
         inserted.cost_hkd,
+        inserted.created_by,
+        inserted.created_at,
         services.name AS service
       FROM inserted
       JOIN services ON services.id = inserted.service_id`,
-      [entryDate, entryMonth, entrySeq, reference, clientName, serviceId, costHkd]
+      [
+        entryDate,
+        entryMonth,
+        entrySeq,
+        reference,
+        clientName,
+        serviceId,
+        costHkd,
+        email,
+      ]
     );
 
     await client.query("COMMIT");
@@ -352,13 +370,17 @@ export async function PATCH(request) {
           reference,
           client_name,
           cost_hkd,
-          service_id
+          service_id,
+          created_by,
+          created_at
       )
       SELECT updated.id,
         updated.entry_date,
         updated.reference,
         updated.client_name,
         updated.cost_hkd,
+        updated.created_by,
+        updated.created_at,
         services.name AS service
       FROM updated
       JOIN services ON services.id = updated.service_id`,

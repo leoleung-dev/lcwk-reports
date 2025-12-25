@@ -35,18 +35,18 @@ API for CRUD operations on sales entries.
   - Behavior: Requires `month` or `year` query param, validates it, and returns sorted rows.
   - Usage: Called by sales list views and summaries.
   - Query params: `month=YYYY-MM` or `year=YYYY`
-  - Response: `{ entries: [{ id, entry_date, reference, client_name, cost_hkd, service }] }`.
+  - Response: `{ entries: [{ id, entry_date, reference, client_name, cost_hkd, service, created_by, created_at }] }`.
 
 - `POST(request)`
   - Purpose: Create a new sales entry and auto-generate a reference number.
-  - Behavior: Validates input, determines the next sequence for the month, inserts the record, and returns it.
+  - Behavior: Validates input, determines the next sequence for the month, inserts the record with the signed-in email as `created_by`, and returns it.
   - Usage: Called by the sales entry form and bulk import.
   - Request body: `{ entryDate, clientName, serviceId, costHkd }`
   - Response: `{ entry }` on success, `{ error }` on failure.
 
 - `PATCH(request)`
   - Purpose: Update an existing sales entry.
-  - Behavior: Validates input, updates the row, and returns the updated record.
+  - Behavior: Validates input, updates the row, and returns the updated record (including the original `created_by` email).
   - Usage: Called by the edit modal.
   - Request body: `{ id, entryDate, clientName, serviceId, costHkd }`
   - Response: `{ entry }` or `{ error }` with 400/404/500.

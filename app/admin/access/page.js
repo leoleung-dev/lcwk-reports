@@ -189,37 +189,54 @@ export default function AccessAdmin() {
         {emailCount === 0 ? (
           <p className={styles.empty}>No accounts have been added yet.</p>
         ) : (
-          <div className={styles.listGrid}>
-            {emails.map((entry) => {
-              const metaText =
-                entry.source === "env"
-                  ? "Managed by environment variables"
-                  : `Added ${formatDate(entry.createdAt)}${
-                      entry.addedBy ? ` by ${entry.addedBy}` : ""
-                    }`;
+          <div className={styles.tableWrap}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Added</th>
+                  <th>Source</th>
+                  <th className={styles.actionsColumn}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emails.map((entry) => {
+                  const metaText =
+                    entry.source === "env"
+                      ? "Managed by environment variables"
+                      : `Added ${formatDate(entry.createdAt)}${
+                          entry.addedBy ? ` by ${entry.addedBy}` : ""
+                        }`;
 
-              return (
-                <div key={entry.id || entry.email} className={styles.emailCard}>
-                  <div>
-                    <p className={styles.emailText}>{entry.email}</p>
-                    <p className={styles.meta}>{metaText}</p>
-                  </div>
-                  <div className={styles.actions}>
-                    {entry.source === "env" ? (
-                      <span className={styles.tag}>Env</span>
-                    ) : (
-                      <button
-                        className={styles.remove}
-                        type="button"
-                        onClick={() => handleRemove(entry.email)}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                  return (
+                    <tr key={entry.id || entry.email}>
+                      <td className={styles.emailText}>{entry.email}</td>
+                      <td className={styles.meta}>{metaText}</td>
+                      <td>
+                        {entry.source === "env" ? (
+                          <span className={styles.tag}>Env</span>
+                        ) : (
+                          "Database"
+                        )}
+                      </td>
+                      <td className={styles.actionsColumn}>
+                        {entry.source === "env" ? (
+                          "—"
+                        ) : (
+                          <button
+                            className={styles.remove}
+                            type="button"
+                            onClick={() => handleRemove(entry.email)}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
@@ -242,34 +259,42 @@ export default function AccessAdmin() {
         {activity.length === 0 ? (
           <p className={styles.empty}>No login activity yet.</p>
         ) : (
-          <div className={styles.activityList}>
-            {activity.map((entry) => {
-              const statusLabel =
-                entry.status === "allowed" ? "Allowed" : "Denied";
-              const statusClass =
-                entry.status === "allowed"
-                  ? styles.statusAllowed
-                  : styles.statusDenied;
-              const meta = [
-                formatDateTime(entry.createdAt),
-                entry.provider || "google",
-                entry.reason || "",
-              ]
-                .filter(Boolean)
-                .join(" | ");
+          <div className={styles.tableWrap}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Email</th>
+                  <th>Provider</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activity.map((entry) => {
+                  const statusLabel =
+                    entry.status === "allowed" ? "Allowed" : "Denied";
+                  const statusClass =
+                    entry.status === "allowed"
+                      ? styles.statusAllowed
+                      : styles.statusDenied;
 
-              return (
-                <div key={entry.id} className={styles.activityRow}>
-                  <div>
-                    <p className={styles.emailText}>
-                      {entry.email || "Unknown email"}
-                    </p>
-                    <p className={styles.meta}>{meta}</p>
-                  </div>
-                  <span className={statusClass}>{statusLabel}</span>
-                </div>
-              );
-            })}
+                  return (
+                    <tr key={entry.id}>
+                      <td>{formatDateTime(entry.createdAt)}</td>
+                      <td className={styles.emailText}>
+                        {entry.email || "Unknown email"}
+                      </td>
+                      <td>{entry.provider || "google"}</td>
+                      <td>{entry.reason || "—"}</td>
+                      <td>
+                        <span className={statusClass}>{statusLabel}</span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>

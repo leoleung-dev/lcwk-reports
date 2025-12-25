@@ -21,3 +21,8 @@ Admin page for maintaining commission handlers used in the commission report.
   - Purpose: Submit a new handler name.
   - Behavior: POSTs to `/api/handlers`, appends the new handler to state, clears the input, and surfaces errors.
   - Usage: Bound to the form `onSubmit` event.
+
+- `handleRemove(handler)`
+  - Purpose: Deactivate a handler from the roster.
+  - Behavior: Confirms the action, calls `DELETE /api/handlers`, removes the handler from state, and surfaces errors.
+  - Usage: Bound to the remove button in the handler list.

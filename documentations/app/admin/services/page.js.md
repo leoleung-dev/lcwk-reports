@@ -21,3 +21,8 @@ Admin page for maintaining the services catalog used in the sales report.
   - Purpose: Submit a new service name.
   - Behavior: POSTs to `/api/services`, appends the new service to state, clears the input, and surfaces errors.
   - Usage: Bound to the form `onSubmit` event.
+
+- `handleRemove(service)`
+  - Purpose: Deactivate a service from the catalog.
+  - Behavior: Confirms the action, calls `DELETE /api/services`, removes the service from state, and surfaces errors.
+  - Usage: Bound to the remove button in the service list.

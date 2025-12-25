@@ -9,6 +9,7 @@ export default function ServicesAdmin() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   async function loadServices() {
     try {
@@ -52,6 +53,37 @@ export default function ServicesAdmin() {
     }
   }
 
+  async function handleRemove(service) {
+    if (!service?.id) {
+      return;
+    }
+    const confirmed = window.confirm(`Remove ${service.name}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    setStatus("");
+    setRemovingId(service.id);
+
+    try {
+      const response = await fetch("/api/services", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: service.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove service.");
+      }
+      setServices((prev) => prev.filter((entry) => entry.id !== service.id));
+      setStatus("Service removed.");
+    } catch (error) {
+      setStatus(error.message);
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -88,18 +120,41 @@ export default function ServicesAdmin() {
 
       <section className={styles.list}>
         <h2>Active services</h2>
-        <div className={styles.listGrid}>
-          {services.length === 0 ? (
-            <p className={styles.empty}>No services yet.</p>
-          ) : (
-            services.map((service) => (
-              <div key={service.id} className={styles.serviceCard}>
-                <span>{service.name}</span>
-                <span className={styles.tag}>Active</span>
-              </div>
-            ))
-          )}
-        </div>
+        {services.length === 0 ? (
+          <p className={styles.empty}>No services yet.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th className={styles.actionsColumn}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {services.map((service) => (
+                  <tr key={service.id}>
+                    <td>{service.name}</td>
+                    <td>
+                      <span className={styles.tag}>Active</span>
+                    </td>
+                    <td className={styles.actionsColumn}>
+                      <button
+                        type="button"
+                        className={styles.removeButton}
+                        onClick={() => handleRemove(service)}
+                        disabled={removingId === service.id}
+                      >
+                        {removingId === service.id ? "Removing..." : "Remove"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </main>
   );

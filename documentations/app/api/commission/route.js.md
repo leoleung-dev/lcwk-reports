@@ -25,17 +25,17 @@ API for CRUD operations on commission entries.
   - Behavior: Validates the `month` query param, joins handlers, and returns sorted rows.
   - Usage: Called by the commission list view.
   - Query params: `month=YYYY-MM`.
-  - Response: `{ entries: [{ id, entry_month, client_name, item_shroud, item_quilt, item_other, total, commission_rate, total_commission, handler }] }`.
+  - Response: `{ entries: [{ id, entry_month, client_name, item_shroud, item_quilt, item_other, total, commission_rate, total_commission, handler, created_by, created_at }] }`.
 
 - `POST(request)`
   - Purpose: Create a new commission entry.
-  - Behavior: Validates fields, calculates totals, inserts the row, and returns it joined with handler name.
+  - Behavior: Validates fields, calculates totals, inserts the row with the signed-in email as `created_by`, and returns it joined with handler name.
   - Usage: Called by the commission form and bulk import.
   - Request body: `{ month, clientName, handlerId, itemShroud, itemQuilt, itemOther, commissionRate }`.
 
 - `PATCH(request)`
   - Purpose: Update an existing commission entry.
-  - Behavior: Validates fields, recalculates totals, updates the row, and returns the updated record.
+  - Behavior: Validates fields, recalculates totals, updates the row, and returns the updated record so the original `created_by` remains visible.
   - Usage: Called by the edit modal.
   - Request body: `{ id, month, clientName, handlerId, itemShroud, itemQuilt, itemOther, commissionRate }`.
 

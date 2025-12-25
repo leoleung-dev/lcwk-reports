@@ -46,7 +46,7 @@ export async function GET(request) {
 
   try {
     const entries = await query(
-      `SELECT ce.id,
+        `SELECT ce.id,
         ce.entry_month,
         ce.client_name,
         ce.item_shroud,
@@ -55,7 +55,9 @@ export async function GET(request) {
         ce.total,
         ce.commission_rate,
         ce.total_commission,
-        ch.name AS handler
+        ch.name AS handler,
+        ce.created_by,
+        ce.created_at
        FROM commission_entries ce
        JOIN commission_handlers ch ON ch.id = ce.handler_id
        WHERE ce.entry_month = $1
@@ -84,7 +86,7 @@ export async function POST(request) {
     );
   }
 
-  const { response } = await requireAuth();
+  const { email, response } = await requireAuth();
   if (response) {
     return response;
   }
@@ -158,9 +160,10 @@ export async function POST(request) {
           item_other,
           total,
           commission_rate,
-          total_commission
+          total_commission,
+          created_by
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING id,
           entry_month,
           client_name,
@@ -170,7 +173,9 @@ export async function POST(request) {
           total,
           commission_rate,
           total_commission,
-          handler_id
+          handler_id,
+          created_by,
+          created_at
       )
       SELECT inserted.id,
         inserted.entry_month,
@@ -181,6 +186,8 @@ export async function POST(request) {
         inserted.total,
         inserted.commission_rate,
         inserted.total_commission,
+        inserted.created_by,
+        inserted.created_at,
         ch.name AS handler
       FROM inserted
       JOIN commission_handlers ch ON ch.id = inserted.handler_id`,
@@ -194,6 +201,7 @@ export async function POST(request) {
         total,
         commissionRate,
         totalCommission,
+        email,
       ]
     );
 
@@ -314,7 +322,9 @@ export async function PATCH(request) {
           total,
           commission_rate,
           total_commission,
-          handler_id
+          handler_id,
+          created_by,
+          created_at
       )
       SELECT updated.id,
         updated.entry_month,
@@ -325,6 +335,8 @@ export async function PATCH(request) {
         updated.total,
         updated.commission_rate,
         updated.total_commission,
+        updated.created_by,
+        updated.created_at,
         ch.name AS handler
       FROM updated
       JOIN commission_handlers ch ON ch.id = updated.handler_id`,

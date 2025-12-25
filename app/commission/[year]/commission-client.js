@@ -2,7 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { BsPencilSquare, BsFillTrash3Fill } from "react-icons/bs";
+import { useSearchParams } from "next/navigation";
+import {
+  BsArrowDownUp,
+  BsSortAlphaDown,
+  BsSortAlphaDownAlt,
+  BsSortDown,
+  BsSortDownAlt,
+  BsPencilSquare,
+  BsFillTrash3Fill,
+} from "react-icons/bs";
 import styles from "./Commission.module.css";
 
 const monthTabs = [
@@ -56,6 +65,44 @@ const moneyFormatter = new Intl.NumberFormat("en-HK", {
 function formatMoney(value) {
   const amount = Number(value || 0);
   return `$${moneyFormatter.format(amount)}`;
+}
+
+function formatCreator(value) {
+  const text = String(value || "").trim();
+  if (!text || text.toLowerCase() === "unknown") {
+    return "Unknown";
+  }
+  const atIndex = text.indexOf("@");
+  if (atIndex === -1) {
+    return text;
+  }
+  const localPart = text.slice(0, atIndex);
+  const marker = ".lcwk";
+  let namePart = "";
+  if (localPart.endsWith(marker)) {
+    namePart = localPart.slice(0, -marker.length);
+  } else if (localPart.includes(marker)) {
+    namePart = localPart.split(marker)[0];
+  } else {
+    return text;
+  }
+  const normalized = namePart.trim().toLowerCase();
+  if (!normalized) {
+    return text;
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "";
+  }
+  const text = String(value);
+  const [datePart, timePart] = text.split("T");
+  if (!timePart) {
+    return datePart;
+  }
+  return `${datePart} ${timePart.split(".")[0]}`;
 }
 
 const monthNames = [
@@ -197,6 +244,8 @@ function formatPercent(value) {
 }
 
 export default function CommissionClient({ year: yearProp }) {
+  const searchParams = useSearchParams();
+  const isAdminView = searchParams?.get("admin") === "true";
   const nowYear = new Date().getFullYear();
   const year = isValidYear(yearProp) ? yearProp : String(nowYear);
   const initialMonth = getInitialMonth(year);
@@ -230,6 +279,11 @@ export default function CommissionClient({ year: yearProp }) {
   const [editMenuOpen, setEditMenuOpen] = useState(false);
   const [editStatus, setEditStatus] = useState("");
   const [editLoading, setEditLoading] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: "created_at",
+    direction: "asc",
+  });
+  const tableColSpan = isAdminView ? 11 : 9;
 
   const handlerInputRef = useRef(null);
   const handlerMenuRef = useRef(null);
@@ -275,6 +329,57 @@ export default function CommissionClient({ year: yearProp }) {
     const totalCommission = Number.isFinite(rate) ? total * rate : 0;
     return { total, totalCommission };
   }, [editItemShroud, editItemQuilt, editItemOther, editCommissionRate]);
+
+  const sortedEntries = useMemo(() => {
+    if (!isAdminView) {
+      return entries;
+    }
+
+    const { key, direction } = sortConfig;
+    const multiplier = direction === "asc" ? 1 : -1;
+    const safeString = (value) => String(value || "").toLowerCase();
+
+    return [...entries].sort((a, b) => {
+      if (key === "created_by") {
+        return (
+          safeString(a.created_by).localeCompare(safeString(b.created_by)) *
+          multiplier
+        );
+      }
+
+      if (key === "created_at") {
+        const left = new Date(a.created_at).getTime();
+        const right = new Date(b.created_at).getTime();
+        return (left - right) * multiplier;
+      }
+
+      return 0;
+    });
+  }, [entries, isAdminView, sortConfig]);
+
+  function updateSort(key, direction) {
+    setSortConfig({ key, direction });
+  }
+
+  function handleSortClick(key) {
+    if (sortConfig.key === key) {
+      updateSort(key, sortConfig.direction === "asc" ? "desc" : "asc");
+      return;
+    }
+    updateSort(key, "asc");
+  }
+
+  function getSortIcon(key, type) {
+    if (sortConfig.key !== key) {
+      return BsArrowDownUp;
+    }
+    if (type === "alpha") {
+      return sortConfig.direction === "asc"
+        ? BsSortAlphaDown
+        : BsSortAlphaDownAlt;
+    }
+    return sortConfig.direction === "asc" ? BsSortDownAlt : BsSortDown;
+  }
 
   useEffect(() => {
     async function loadHandlers() {
@@ -929,18 +1034,62 @@ export default function CommissionClient({ year: yearProp }) {
                   <th>總計</th>
                   <th>佣</th>
                   <th>Total Commission</th>
+                  {isAdminView ? (
+                    <>
+                      <th>
+                        <div className={styles.thContent}>
+                          <span>Created by</span>
+                          <button
+                            type="button"
+                            className={`${styles.sortButton} ${
+                              sortConfig.key === "created_by"
+                                ? styles.sortActive
+                                : ""
+                            }`}
+                            onClick={() => handleSortClick("created_by")}
+                            aria-label="Sort created by"
+                          >
+                            {(() => {
+                              const Icon = getSortIcon("created_by", "alpha");
+                              return <Icon aria-hidden />;
+                            })()}
+                          </button>
+                        </div>
+                      </th>
+                      <th>
+                        <div className={styles.thContent}>
+                          <span>Created on</span>
+                          <button
+                            type="button"
+                            className={`${styles.sortButton} ${
+                              sortConfig.key === "created_at"
+                                ? styles.sortActive
+                                : ""
+                            }`}
+                            onClick={() => handleSortClick("created_at")}
+                            aria-label="Sort created on"
+                          >
+                            {(() => {
+                              const Icon = getSortIcon("created_at", "numeric");
+                              return <Icon aria-hidden />;
+                            })()}
+                          </button>
+                        </div>
+                      </th>
+                    </>
+                  ) : null}
                   <th>Edit</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.length === 0 ? (
                   <tr>
-                    <td colSpan="9" className={styles.empty}>
+                    <td colSpan={tableColSpan} className={styles.empty}>
                       No entries yet for this month.
                     </td>
                   </tr>
                 ) : (
-                  entries.map((entry) => (
+                  sortedEntries.map((entry) => (
                     <tr key={entry.id}>
                       <td>{entry.client_name}</td>
                       <td>{entry.handler}</td>
@@ -950,6 +1099,12 @@ export default function CommissionClient({ year: yearProp }) {
                       <td>{formatMoney(Number(entry.total))}</td>
                       <td>{`${(Number(entry.commission_rate) * 100).toFixed(0)}%`}</td>
                       <td>{formatMoney(Number(entry.total_commission))}</td>
+                      {isAdminView ? (
+                        <>
+                          <td>{formatCreator(entry.created_by)}</td>
+                          <td>{formatDateTime(entry.created_at)}</td>
+                        </>
+                      ) : null}
                       <td>
                         <button
                           type="button"
@@ -970,7 +1125,7 @@ export default function CommissionClient({ year: yearProp }) {
             {entries.length === 0 ? (
               <div className={styles.empty}>No entries yet for this month.</div>
             ) : (
-              entries.map((entry) => (
+              sortedEntries.map((entry) => (
                 <div key={entry.id} className={styles.entryCard}>
                   <div className={styles.cardRow}>
                     <div className={styles.cardCell}>
@@ -1009,6 +1164,18 @@ export default function CommissionClient({ year: yearProp }) {
                       <span className={styles.cardLabel}>Commission</span>
                       <span>{formatMoney(Number(entry.total_commission))}</span>
                     </div>
+                    {isAdminView ? (
+                      <>
+                        <div className={styles.cardCell}>
+                          <span className={styles.cardLabel}>Created by</span>
+                          <span>{formatCreator(entry.created_by)}</span>
+                        </div>
+                        <div className={styles.cardCell}>
+                          <span className={styles.cardLabel}>Created on</span>
+                          <span>{formatDateTime(entry.created_at)}</span>
+                        </div>
+                      </>
+                    ) : null}
                     <div className={styles.cardCell}>
                       <span className={styles.cardLabel}>Edit</span>
                       <button

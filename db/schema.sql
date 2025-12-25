@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS sales_entries (
   client_name TEXT NOT NULL,
   service_id BIGINT NOT NULL REFERENCES services(id),
   cost_hkd NUMERIC(12, 2) NOT NULL,
+  created_by TEXT NOT NULL DEFAULT 'unknown',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (entry_month, entry_seq)
 );
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS commission_entries (
   total NUMERIC(12, 2) NOT NULL,
   commission_rate NUMERIC(5, 4) NOT NULL,
   total_commission NUMERIC(12, 2) NOT NULL,
+  created_by TEXT NOT NULL DEFAULT 'unknown',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

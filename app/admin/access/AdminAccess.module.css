@@ -142,34 +142,42 @@
   color: var(--muted);
 }
 
-.listGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
+.tableWrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: auto;
+  box-shadow: 0 18px 36px var(--shadow);
+}
+
+.tableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 680px;
+}
+
+.tableWrap th,
+.tableWrap td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.tableWrap thead {
+  background: rgba(255, 250, 242, 0.6);
+  font-weight: 600;
+}
+
+.actionsColumn {
+  text-align: right;
+  width: 140px;
 }
 
 .activity {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.activityList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.activityRow {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 10px 20px var(--shadow);
 }
 
 .statusAllowed,
@@ -190,18 +198,6 @@
   color: var(--accent-strong);
 }
 
-.emailCard {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 10px 20px var(--shadow);
-}
-
 .emailText {
   font-weight: 600;
 }
@@ -209,13 +205,6 @@
 .meta {
   font-size: 0.85rem;
   color: var(--muted);
-  margin-top: 4px;
-}
-
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .remove {

@@ -9,6 +9,7 @@ export default function HandlersAdmin() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [removingId, setRemovingId] = useState(null);
 
   async function loadHandlers() {
     try {
@@ -52,6 +53,37 @@ export default function HandlersAdmin() {
     }
   }
 
+  async function handleRemove(handler) {
+    if (!handler?.id) {
+      return;
+    }
+    const confirmed = window.confirm(`Remove ${handler.name}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    setStatus("");
+    setRemovingId(handler.id);
+
+    try {
+      const response = await fetch("/api/handlers", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: handler.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to remove handler.");
+      }
+      setHandlers((prev) => prev.filter((entry) => entry.id !== handler.id));
+      setStatus("Handler removed.");
+    } catch (error) {
+      setStatus(error.message);
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -88,18 +120,41 @@ export default function HandlersAdmin() {
 
       <section className={styles.list}>
         <h2>Active handlers</h2>
-        <div className={styles.listGrid}>
-          {handlers.length === 0 ? (
-            <p className={styles.empty}>No handlers yet.</p>
-          ) : (
-            handlers.map((handler) => (
-              <div key={handler.id} className={styles.serviceCard}>
-                <span>{handler.name}</span>
-                <span className={styles.tag}>Active</span>
-              </div>
-            ))
-          )}
-        </div>
+        {handlers.length === 0 ? (
+          <p className={styles.empty}>No handlers yet.</p>
+        ) : (
+          <div className={styles.tableWrap}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Handler</th>
+                  <th>Status</th>
+                  <th className={styles.actionsColumn}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {handlers.map((handler) => (
+                  <tr key={handler.id}>
+                    <td>{handler.name}</td>
+                    <td>
+                      <span className={styles.tag}>Active</span>
+                    </td>
+                    <td className={styles.actionsColumn}>
+                      <button
+                        type="button"
+                        className={styles.removeButton}
+                        onClick={() => handleRemove(handler)}
+                        disabled={removingId === handler.id}
+                      >
+                        {removingId === handler.id ? "Removing..." : "Remove"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </main>
   );

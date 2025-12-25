@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   BsArrowDownUp,
@@ -112,6 +113,44 @@ function formatDate(value) {
   return text.includes("T") ? text.split("T")[0] : text;
 }
 
+function formatDateTime(value) {
+  if (!value) {
+    return "";
+  }
+  const text = String(value);
+  const [datePart, timePart] = text.split("T");
+  if (!timePart) {
+    return datePart;
+  }
+  return `${datePart} ${timePart.split(".")[0]}`;
+}
+
+function formatCreator(value) {
+  const text = String(value || "").trim();
+  if (!text || text.toLowerCase() === "unknown") {
+    return "Unknown";
+  }
+  const atIndex = text.indexOf("@");
+  if (atIndex === -1) {
+    return text;
+  }
+  const localPart = text.slice(0, atIndex);
+  const marker = ".lcwk";
+  let namePart = "";
+  if (localPart.endsWith(marker)) {
+    namePart = localPart.slice(0, -marker.length);
+  } else if (localPart.includes(marker)) {
+    namePart = localPart.split(marker)[0];
+  } else {
+    return text;
+  }
+  const normalized = namePart.trim().toLowerCase();
+  if (!normalized) {
+    return text;
+  }
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 function getSexagenaryYearLabel(yearValue) {
   const yearNum = Number(yearValue);
   if (!Number.isFinite(yearNum)) {
@@ -125,6 +164,8 @@ function getSexagenaryYearLabel(yearValue) {
 }
 
 export default function SalesClient({ year: yearProp }) {
+  const searchParams = useSearchParams();
+  const isAdminView = searchParams?.get("admin") === "true";
   const nowYear = new Date().getFullYear();
   const year = isValidYear(yearProp) ? yearProp : String(nowYear);
   const initialMonth = getInitialMonth(year);
@@ -160,6 +201,7 @@ export default function SalesClient({ year: yearProp }) {
     key: "reference",
     direction: "asc",
   });
+  const tableColSpan = isAdminView ? 8 : 6;
 
   const total = useMemo(() => {
     return entries.reduce((sum, entry) => sum + Number(entry.cost_hkd || 0), 0);
@@ -229,6 +271,18 @@ export default function SalesClient({ year: yearProp }) {
         left = safeString(a.service);
         right = safeString(b.service);
         return left.localeCompare(right) * multiplier;
+      }
+
+      if (key === "created_by") {
+        left = safeString(a.created_by);
+        right = safeString(b.created_by);
+        return left.localeCompare(right) * multiplier;
+      }
+
+      if (key === "created_at") {
+        left = new Date(a.created_at).getTime();
+        right = new Date(b.created_at).getTime();
+        return (left - right) * multiplier;
       }
 
       return 0;
@@ -1011,6 +1065,50 @@ export default function SalesClient({ year: yearProp }) {
                       <span>Service</span>
                     </div>
                   </th>
+                  {isAdminView ? (
+                    <>
+                      <th>
+                        <div className={styles.thContent}>
+                          <span>Created by</span>
+                          <button
+                            type="button"
+                            className={`${styles.sortButton} ${
+                              sortConfig.key === "created_by"
+                                ? styles.sortActive
+                                : ""
+                            }`}
+                            onClick={() => handleSortClick("created_by")}
+                            aria-label="Sort created by"
+                          >
+                            {(() => {
+                              const Icon = getSortIcon("created_by", "alpha");
+                              return <Icon aria-hidden />;
+                            })()}
+                          </button>
+                        </div>
+                      </th>
+                      <th>
+                        <div className={styles.thContent}>
+                          <span>Created on</span>
+                          <button
+                            type="button"
+                            className={`${styles.sortButton} ${
+                              sortConfig.key === "created_at"
+                                ? styles.sortActive
+                                : ""
+                            }`}
+                            onClick={() => handleSortClick("created_at")}
+                            aria-label="Sort created on"
+                          >
+                            {(() => {
+                              const Icon = getSortIcon("created_at", "numeric");
+                              return <Icon aria-hidden />;
+                            })()}
+                          </button>
+                        </div>
+                      </th>
+                    </>
+                  ) : null}
                   <th className={styles.amount}>
                     <div className={styles.thContent}>
                       <span>Cost</span>
@@ -1035,7 +1133,7 @@ export default function SalesClient({ year: yearProp }) {
               <tbody>
                 {entries.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className={styles.empty}>
+                    <td colSpan={tableColSpan} className={styles.empty}>
                       No entries yet for this month.
                     </td>
                   </tr>
@@ -1054,6 +1152,12 @@ export default function SalesClient({ year: yearProp }) {
                           {entry.service}
                         </span>
                       </td>
+                      {isAdminView ? (
+                        <>
+                          <td>{formatCreator(entry.created_by)}</td>
+                          <td>{formatDateTime(entry.created_at)}</td>
+                        </>
+                      ) : null}
                       <td className={styles.amount}>
                       {formatMoney(Number(entry.cost_hkd || 0))}
                       </td>
@@ -1106,6 +1210,18 @@ export default function SalesClient({ year: yearProp }) {
                       <span className={styles.cardLabel}>Cost</span>
                       <span>{formatMoney(Number(entry.cost_hkd || 0))}</span>
                     </div>
+                    {isAdminView ? (
+                      <>
+                        <div className={styles.cardCell}>
+                          <span className={styles.cardLabel}>Created by</span>
+                          <span>{formatCreator(entry.created_by)}</span>
+                        </div>
+                        <div className={styles.cardCell}>
+                          <span className={styles.cardLabel}>Created on</span>
+                          <span>{formatDateTime(entry.created_at)}</span>
+                        </div>
+                      </>
+                    ) : null}
                     <div className={styles.cardCell}>
                       <span className={styles.cardLabel}>Edit</span>
                       <button
