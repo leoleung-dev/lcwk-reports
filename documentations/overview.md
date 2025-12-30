@@ -1,11 +1,11 @@
 # Project Overview
 
 ## Purpose
-LCWK Reports is a Next.js App Router application that tracks annual sales and commission entries. It provides monthly entry workflows, annual summaries, and Excel exports for staff to manage reporting data.
+LCWK Reports is a Next.js App Router application that tracks annual sales, commission, and cerement totals. It provides monthly entry workflows, annual summaries, and Excel exports for staff to manage reporting data.
 
 ## How the system is linked together
-- UI pages and client components live under `app/` and render the sales and commission workflows.
-- Client components call API routes under `app/api/**` to read and mutate data.
+- UI pages and client components live under `app/` and render the sales, commission, and cerement workflows.
+- Client components call API routes under `app/api/**` to read and mutate data (including month-end cerement totals).
 - API routes use `lib/db.js` to execute Postgres queries against NeonDB via the `pg` driver.
 - Admin pages (`/admin/services` and `/admin/handlers`) maintain lookup tables used by the main reports.
 - Summary pages (`/sales/{year}/summary`, `/commission/{year}/summary`) call summary endpoints to build charts and tables.
@@ -24,6 +24,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 2. The client component loads data via the matching API route.
 3. The API route validates input, queries Postgres, and returns JSON.
 4. The client updates state, renders tables, and offers export actions.
+5. Commission bulk paste accepts an optional first column for month (e.g., Aug/August/08); when present, each row routes to that month, otherwise the selected month is used.
 
 ## Environment variables
 - `DATABASE_URL`: Neon Postgres connection string.
@@ -37,3 +38,6 @@ LCWK Reports is a Next.js App Router application that tracks annual sales and co
 ## Deployment
 - Built for Vercel with NeonDB as the backing database.
 - Uses Node runtime for API routes that generate Excel exports.
+
+## Codex agent guide
+- `AGENTS.md` documents Codex-specific conventions, including when to update docs and how to share schema add-ons after changes.
