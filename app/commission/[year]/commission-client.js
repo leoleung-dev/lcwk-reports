@@ -200,7 +200,12 @@ function splitColumns(line) {
 }
 
 function parseCurrency(value) {
-  const text = String(value || "").replace(/[\s$,]/g, "");
+  const raw = String(value || "").trim();
+  const normalized = raw.replace(/\s+/g, "");
+  if (normalized === "自來" || normalized === "自来") {
+    return 0;
+  }
+  const text = normalized.replace(/[$,]/g, "");
   if (!text) {
     return 0;
   }

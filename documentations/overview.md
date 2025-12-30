@@ -24,7 +24,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales, commi
 2. The client component loads data via the matching API route.
 3. The API route validates input, queries Postgres, and returns JSON.
 4. The client updates state, renders tables, and offers export actions.
-5. Commission bulk paste accepts an optional first column for month (e.g., Aug/August/08); when present, each row routes to that month, otherwise the selected month is used.
+5. Commission bulk paste accepts an optional first column for month (e.g., Aug/August/08); when present, each row routes to that month, otherwise the selected month is used. It also treats `自來` as a zero amount when pasted in item columns.
 
 ## Environment variables
 - `DATABASE_URL`: Neon Postgres connection string.
