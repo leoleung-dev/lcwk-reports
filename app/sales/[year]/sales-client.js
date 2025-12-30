@@ -408,19 +408,31 @@ export default function SalesClient({ year: yearProp }) {
     }
   }, [entryDate]);
 
-  function normalizeDate(value) {
-    const text = String(value || "").trim();
-    if (!text) {
+function normalizeDate(value, fallbackYear) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return text;
+  }
+  const chineseMatch = text.match(
+    /^(\d{4})?\s*年?\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日?$/
+  );
+  if (chineseMatch) {
+    const yearText = chineseMatch[1] || fallbackYear;
+    if (!/^\d{4}$/.test(yearText || "")) {
       return "";
     }
-    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
-      return text;
-    }
-    const parts = text.split("/");
-    if (parts.length === 3) {
-      const [rawMonth, rawDay, rawYear] = parts;
-      const month = rawMonth.padStart(2, "0");
-      const day = rawDay.padStart(2, "0");
+    const month = String(chineseMatch[2]).padStart(2, "0");
+    const day = String(chineseMatch[3]).padStart(2, "0");
+    return `${yearText}-${month}-${day}`;
+  }
+  const parts = text.split("/");
+  if (parts.length === 3) {
+    const [rawMonth, rawDay, rawYear] = parts;
+    const month = rawMonth.padStart(2, "0");
+    const day = rawDay.padStart(2, "0");
       let year = rawYear;
       if (rawYear.length === 2) {
         year = String(2000 + Number(rawYear));
@@ -691,7 +703,7 @@ export default function SalesClient({ year: yearProp }) {
           return;
         }
 
-        const normalizedDate = normalizeDate(dateText);
+        const normalizedDate = normalizeDate(dateText, year);
         if (!normalizedDate) {
           errors.push(`Row ${index + 1}: invalid date "${dateText}".`);
           return;
@@ -846,13 +858,13 @@ export default function SalesClient({ year: yearProp }) {
             <h3>Paste list</h3>
             <p>
               Paste tab-separated rows: Date, Ref (optional), Client name,
-              Service, Cost.
+              Service, Cost. Dates can be like 10月7日.
             </p>
           </div>
           <textarea
             className={styles.bulkText}
             rows={6}
-            placeholder="11/3/25	1	鄒汝添府君	加灰喃嘸費用	2800"
+            placeholder="10月7日	1	鄒汝添府君	加灰喃嘸費用	2800"
             value={bulkText}
             onChange={(event) => setBulkText(event.target.value)}
           />
