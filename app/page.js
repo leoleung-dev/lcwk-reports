@@ -13,41 +13,23 @@ export default function Home() {
         </p>
       </header>
 
-      <div className={styles.reportSections}>
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>梁津煥記(禮儀顧問)</h2>
-          <div className={styles.cards}>
-            <Link className={styles.card} href="/sales">
-              <div>
-                <h3>營業額 · Annual Sales</h3>
-                <p>Enter monthly sales items and export in one click.</p>
-              </div>
-              <span className={styles.cta}>Open report</span>
-            </Link>
-
-            <Link className={styles.card} href="/commission">
-              <div>
-                <h3>佣金登記 · Master Commission</h3>
-                <p>Track commission entries and totals by month.</p>
-              </div>
-              <span className={styles.cta}>Open report</span>
-            </Link>
+      <section className={styles.cards}>
+        <Link className={styles.card} href="/sales">
+          <div>
+            <h2>營業額 · Annual Sales</h2>
+            <p>Enter monthly sales items and export in one click.</p>
           </div>
-        </section>
+          <span className={styles.cta}>Open report</span>
+        </Link>
 
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>梁津煥記</h2>
-          <div className={styles.cards}>
-            <Link className={styles.card} href="/cerement">
-              <div>
-                <h3>壽衣紀錄 · Cerement</h3>
-                <p>Record month-end totals by location.</p>
-              </div>
-              <span className={styles.cta}>Open report</span>
-            </Link>
+        <Link className={styles.card} href="/commission">
+          <div>
+            <h2>佣金登記 · Master Commission</h2>
+            <p>Track commission entries and totals by month.</p>
           </div>
-        </section>
-      </div>
+          <span className={styles.cta}>Open report</span>
+        </Link>
+      </section>
     </main>
   );
 }

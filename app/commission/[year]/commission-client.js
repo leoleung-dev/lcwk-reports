@@ -120,16 +120,6 @@ const monthNames = [
   "december",
 ];
 
-const monthLookup = (() => {
-  const map = {};
-  monthTabs.forEach((tab, index) => {
-    map[tab.label.toLowerCase()] = tab.value;
-    map[monthNames[index]] = tab.value;
-  });
-  map.sept = "09";
-  return map;
-})();
-
 function isValidYear(value) {
   return /^\d{4}$/.test(value || "");
 }
@@ -228,49 +218,6 @@ function parseRate(value, total, totalCommission) {
     return 0;
   }
   return NaN;
-}
-
-function parseMonthColumn(value, fallbackYear) {
-  const raw = String(value || "").trim();
-  if (!raw) {
-    return null;
-  }
-
-  const yearMonthMatch = raw.match(/^(\d{4})[/-](\d{1,2})$/);
-  if (yearMonthMatch) {
-    const [, yearText, monthText] = yearMonthMatch;
-    const normalizedMonth = monthText.padStart(2, "0");
-    const monthNum = Number(normalizedMonth);
-    if (monthNum >= 1 && monthNum <= 12) {
-      return `${yearText}-${normalizedMonth}`;
-    }
-  }
-
-  if (/^\d{1,2}$/.test(raw)) {
-    const normalizedMonth = raw.padStart(2, "0");
-    const monthNum = Number(normalizedMonth);
-    if (monthNum >= 1 && monthNum <= 12) {
-      return `${fallbackYear}-${normalizedMonth}`;
-    }
-  }
-
-  const tokens = raw
-    .toLowerCase()
-    .replace(/[.,/\\-]/g, " ")
-    .split(/\s+/)
-    .filter(Boolean);
-  if (tokens.length === 0) {
-    return null;
-  }
-
-  const monthToken = tokens.find((token) => monthLookup[token]);
-  if (!monthToken) {
-    return null;
-  }
-
-  const yearToken = tokens.find((token) => /^\d{4}$/.test(token));
-  const yearValue = yearToken || fallbackYear;
-  return `${yearValue}-${monthLookup[monthToken]}`;
 }
 
 function parsePercent(value) {
@@ -702,11 +649,9 @@ export default function CommissionClient({ year: yearProp }) {
         }
 
         let cursor = 0;
-        let rowMonth = parseMonthColumn(columns[0], year);
-        if (rowMonth) {
+        const firstValue = columns[0]?.toLowerCase();
+        if (monthNames.includes(firstValue)) {
           cursor += 1;
-        } else {
-          rowMonth = month;
         }
 
         const client = columns[cursor];
@@ -760,7 +705,6 @@ export default function CommissionClient({ year: yearProp }) {
         }
 
         parsedRows.push({
-          month: rowMonth,
           clientName: String(client).trim(),
           handlerName: String(handler).trim(),
           itemShroud: shroud,
@@ -785,7 +729,7 @@ export default function CommissionClient({ year: yearProp }) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              month: row.month,
+              month,
               clientName: row.clientName,
               handlerId,
               itemShroud: row.itemShroud,
@@ -899,15 +843,14 @@ export default function CommissionClient({ year: yearProp }) {
           <div>
             <h3>Paste list</h3>
             <p>
-              Paste rows with optional Month, Client, Handler, items, total,
-              rate, commission. If the first column is a month (Aug, August,
-              08), that row uses it; otherwise the selected month applies.
+              Paste rows with Client, Handler, items, total, rate, commission.
+              The selected month is applied to all rows.
             </p>
           </div>
           <textarea
             className={styles.bulkText}
             rows={6}
-            placeholder="August	陸鄭嬙	梁家強		$138,000.00	$12,800.00	$150,800.00	30%	$45,240.00"
+            placeholder="陸鄭嬙	梁家強		$138,000.00	$12,800.00	$150,800.00	30%	$45,240.00"
             value={bulkText}
             onChange={(event) => setBulkText(event.target.value)}
           />

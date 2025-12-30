@@ -50,23 +50,6 @@ CREATE TABLE IF NOT EXISTS commission_entries (
 CREATE INDEX IF NOT EXISTS idx_commission_entries_month
   ON commission_entries (entry_month);
 
-CREATE TABLE IF NOT EXISTS cerement_reports (
-  id BIGSERIAL PRIMARY KEY,
-  entry_month CHAR(4) NOT NULL UNIQUE,
-  amount_sifangjie NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  amount_hk_shop NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  amount_hk_pickup NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  amount_branch_sales NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  amount_consultant NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  created_by TEXT NOT NULL DEFAULT 'unknown',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_by TEXT,
-  updated_at TIMESTAMPTZ
-);
-
-CREATE INDEX IF NOT EXISTS idx_cerement_reports_month
-  ON cerement_reports (entry_month);
-
 CREATE TABLE IF NOT EXISTS allowed_emails (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
