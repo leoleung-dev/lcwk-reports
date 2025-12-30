@@ -8,7 +8,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales, commi
 - Client components call API routes under `app/api/**` to read and mutate data (including month-end cerement totals).
 - API routes use `lib/db.js` to execute Postgres queries against NeonDB via the `pg` driver.
 - Admin pages (`/admin/services` and `/admin/handlers`) maintain lookup tables used by the main reports.
-- Summary pages (`/sales/{year}/summary`, `/commission/{year}/summary`) call summary endpoints to build charts and tables.
+- Summary pages (`/sales/{year}/summary`, `/commission/{year}/summary`, `/cerement/{year}/summary`) call summary endpoints or year-based data to build charts and tables.
 - Export endpoints (`/api/sales/export`, `/api/commission/export`) generate `.xlsx` files using the `xlsx` library.
 
 ## Data model at a glance
@@ -26,6 +26,8 @@ LCWK Reports is a Next.js App Router application that tracks annual sales, commi
 4. The client updates state, renders tables, and offers export actions.
 5. Commission bulk paste accepts an optional first column for month (e.g., Aug/August/08); when present, each row routes to that month, otherwise the selected month is used. It also treats `自來` as a zero amount when pasted in item columns.
 6. Sales bulk paste accepts Chinese date formats like `10月7日` (with optional year) and normalizes them to YYYY-MM-DD.
+7. Cerement annual summary uses year-based data from `/api/cerement?year=YYYY` and is linked from the monthly entry page.
+8. Cerement bulk paste accepts Chinese dates like `1月31日` and maps the five location totals to the matching month in the selected year.
 
 ## Environment variables
 - `DATABASE_URL`: Neon Postgres connection string.
@@ -35,6 +37,7 @@ LCWK Reports is a Next.js App Router application that tracks annual sales, commi
 - `AUTHORIZED_EMAILS`: optional comma-separated list of emails allowed to sign in.
 - `NEXT_PUBLIC_SALE_BULK_ENTRY`: toggles sales bulk paste UI.
 - `NEXT_PUBLIC_COMMISSION_BULK_ENTRY`: toggles commission bulk paste UI.
+- `NEXT_PUBLIC_CEREMENT_BULK_ENTRY`: toggles cerement bulk paste UI.
 
 ## Deployment
 - Built for Vercel with NeonDB as the backing database.
