@@ -220,15 +220,12 @@ export default function SummaryClient({ year: yearProp }) {
           <p>Monthly totals, service breakdown, and detailed entries.</p>
         </div>
         <div className={styles.headerActions}>
-          <Link className={styles.overallLink} href="/sales/summary/overall">
-            Overall
-          </Link>
           <div className={styles.yearNav}>
-            <Link className={styles.yearLink} href={`/sales/summary/${Number(year) - 1}`}>
+            <Link className={styles.yearLink} href={`/sales/${Number(year) - 1}/summary`}>
               ← {Number(year) - 1}
             </Link>
             <div className={styles.yearBadge}>{year}</div>
-            <Link className={styles.yearLink} href={`/sales/summary/${Number(year) + 1}`}>
+            <Link className={styles.yearLink} href={`/sales/${Number(year) + 1}/summary`}>
               {Number(year) + 1} →
             </Link>
           </div>
@@ -313,11 +310,7 @@ export default function SummaryClient({ year: yearProp }) {
                 <p>No services recorded.</p>
               ) : (
                 serviceBreakdown.map((item, index) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={styles.legendItem}
-                  >
+                  <div key={item.name} className={styles.legendItem}>
                     <span
                       className={styles.legendSwatch}
                       style={{ background: palette[index % palette.length] }}
@@ -329,7 +322,7 @@ export default function SummaryClient({ year: yearProp }) {
                         {formatPercent(item.total / (pieTotal || 1))})
                       </span>
                     </div>
-                  </button>
+                  </div>
                 ))
               )}
             </div>

@@ -35,7 +35,7 @@ Client-side annual sales summary view. It renders monthly bar charts, a service-
     - Loads entries via `/api/sales?month=YYYY-MM` or `/api/sales?year=YYYY` depending on the selected month.
     - Builds bar chart heights and pie breakdown from loaded data.
     - Allows month selection via tabs and chart clicks; “All Year” clears focus.
-  - Usage: Rendered by `app/sales/summary/[year]/page.js` (legacy route redirects).
+  - Usage: Rendered by `app/sales/[year]/summary/page.js`.
 
 - `handleExportSelection()`
   - Purpose: Export either the selected month or the entire year.
