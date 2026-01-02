@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import BarChart from "@/app/components/charts/BarChart";
+import PieChart from "@/app/components/charts/PieChart";
 import styles from "./Summary.module.css";
 
 const monthLabels = [
@@ -53,9 +55,19 @@ const moneyFormatter = new Intl.NumberFormat("en-HK", {
   maximumFractionDigits: 2,
 });
 
+const compactMoneyFormatter = new Intl.NumberFormat("en-HK", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 function formatMoney(value) {
   const amount = Number(value || 0);
   return `$${moneyFormatter.format(amount)}`;
+}
+
+function formatCompactMoney(value) {
+  const amount = Number(value || 0);
+  return `$${compactMoneyFormatter.format(amount)}`;
 }
 
 function formatPercent(value) {
@@ -271,32 +283,27 @@ export default function SummaryClient({ year: yearProp }) {
             <h2>Monthly totals</h2>
             <span>Click a month to view details</span>
           </div>
-          <div className={styles.barChart}>
-            {months.map((item, index) => {
-              const height = maxTotal
-                ? Math.max((item.total / maxTotal) * 100, 5)
-                : 4;
-              const isActive = item.month === selectedMonth;
-              return (
-                <button
-                  key={item.month}
-                  type="button"
-                  className={`${styles.barItem} ${
-                    isActive ? styles.barActive : ""
-                  }`}
-                  onClick={() => setSelectedMonth(item.month)}
-                  title={`${item.month}: ${formatMoney(item.total)}`}
-                  aria-label={`${item.month} total ${formatMoney(item.total)}`}
-                >
-                  <span className={styles.barFill} style={{ height: `${height}%` }} />
-                  <span className={styles.barLabel}>{monthLabels[index]}</span>
-                  <span className={styles.barTooltip}>
-                    {formatMoney(item.total)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <BarChart
+            groups={months.map((item, index) => ({
+              key: item.month,
+              label: monthLabels[index],
+              bars: [
+                {
+                  key: `${item.month}-total`,
+                  value: item.total,
+                  tooltipLabel: monthLabels[index],
+                },
+              ],
+            }))}
+            maxValue={maxTotal}
+            columns={12}
+            activeGroupKey={selectedMonth}
+            onGroupClick={(key) => setSelectedMonth(key)}
+            formatValue={formatMoney}
+            formatValueLabel={formatCompactMoney}
+            chartHeight={220}
+            ariaLabel={`${year} monthly totals`}
+          />
         </div>
 
         <div className={styles.pieCard}>
@@ -304,36 +311,16 @@ export default function SummaryClient({ year: yearProp }) {
             <h2>Service mix ({selectedLabel})</h2>
             <span>{formatMoney(pieTotal)}</span>
           </div>
-          <div className={styles.pieLayout}>
-            <div className={styles.pieChart} style={pieStyle}>
-              {pieTotal === 0 ? <span>No data</span> : null}
-            </div>
-            <div className={styles.legend}>
-              {serviceBreakdown.length === 0 ? (
-                <p>No services recorded.</p>
-              ) : (
-                serviceBreakdown.map((item, index) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={styles.legendItem}
-                  >
-                    <span
-                      className={styles.legendSwatch}
-                      style={{ background: palette[index % palette.length] }}
-                    />
-                    <div>
-                      <strong>{item.name}</strong>
-                      <span>
-                        {formatMoney(item.total)} (
-                        {formatPercent(item.total / (pieTotal || 1))})
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
+          <PieChart
+            data={serviceBreakdown.map((item) => ({
+              label: item.name,
+              value: item.total,
+            }))}
+            palette={palette}
+            formatValue={formatMoney}
+            formatPercent={formatPercent}
+            emptyLabel="No services recorded."
+          />
         </div>
       </section>
 

@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { BsGear } from "react-icons/bs";
+import BarChart from "@/app/components/charts/BarChart";
+import LineChart from "@/app/components/charts/LineChart";
+import PieChart from "@/app/components/charts/PieChart";
 import styles from "./Summary.module.css";
 
 const monthTabs = [
@@ -64,6 +67,11 @@ const moneyFormatter = new Intl.NumberFormat("en-HK", {
   maximumFractionDigits: 2,
 });
 
+const compactMoneyFormatter = new Intl.NumberFormat("en-HK", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 function isValidYear(value) {
   return /^\d{4}$/.test(value || "");
 }
@@ -73,8 +81,18 @@ function formatMoney(value) {
   return `$${moneyFormatter.format(amount)}`;
 }
 
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
+function formatCompactMoney(value) {
+  const amount = Number(value || 0);
+  return `$${compactMoneyFormatter.format(amount)}`;
+}
+
+function formatPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) {
+    return "0%";
+  }
+  const scaled = percent * 100;
+  return `${scaled.toFixed(1).replace(/\.0$/, "")}%`;
 }
 
 function buildMonthRows(yearValue, entriesList) {
@@ -109,8 +127,6 @@ export default function CerementSummaryClient({ year: yearProp }) {
   const [entries, setEntries] = useState([]);
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [pieHover, setPieHover] = useState(null);
   const [controlsOpen, setControlsOpen] = useState(false);
   const [showLineChart, setShowLineChart] = useState(true);
   const [showBarChart, setShowBarChart] = useState(true);
@@ -192,7 +208,6 @@ export default function CerementSummaryClient({ year: yearProp }) {
     setCompareEntriesByYear({});
     setCompareLoadingByYear({});
     setCompareErrorsByYear({});
-    setHoveredIndex(null);
     setCompareMetric("total");
     setShowLineChart(true);
     setShowBarChart(true);
@@ -239,13 +254,14 @@ export default function CerementSummaryClient({ year: yearProp }) {
     if (compareMetric === "total") {
       return monthTabs.map((tab, index) => {
         const row = monthRows[index];
-        const values = amountColumns.map((column, columnIndex) => ({
+        const bars = amountColumns.map((column, columnIndex) => ({
           key: column.key,
           label: column.label,
           value: row ? Number(row[column.key] || 0) : 0,
           color: barPalette[columnIndex % barPalette.length],
+          tooltipLabel: column.label,
         }));
-        return { label: tab.label, values };
+        return { key: tab.value, label: tab.label, bars };
       });
     }
 
@@ -261,13 +277,15 @@ export default function CerementSummaryClient({ year: yearProp }) {
       const row = monthRows[index];
       const value = row ? Number(row[compareMetric] || 0) : 0;
       return {
+        key: tab.value,
         label: tab.label,
-        values: [
+        bars: [
           {
             key: compareMetric,
             label: compareMetricLabel,
             value,
             color: selectedColor,
+            tooltipLabel: compareMetricLabel,
           },
         ],
       };
@@ -276,7 +294,7 @@ export default function CerementSummaryClient({ year: yearProp }) {
 
   const barMax = useMemo(() => {
     return Math.max(
-      ...barGroups.flatMap((group) => group.values.map((item) => item.value)),
+      ...barGroups.flatMap((group) => group.bars.map((item) => item.value)),
       0
     );
   }, [barGroups]);
@@ -290,11 +308,7 @@ export default function CerementSummaryClient({ year: yearProp }) {
             ? row.total || 0
             : row[compareMetric] || 0
           : 0;
-        return {
-          label: tab.label,
-          value,
-          color: piePalette[index % piePalette.length],
-        };
+        return { label: tab.label, value };
       })
       .filter((item) => item.value > 0);
   }, [compareMetric, monthRows]);
@@ -302,41 +316,6 @@ export default function CerementSummaryClient({ year: yearProp }) {
   const pieTotal = useMemo(() => {
     return pieData.reduce((sum, item) => sum + item.value, 0);
   }, [pieData]);
-
-  const pieSegments = useMemo(() => {
-    if (pieTotal <= 0) {
-      return [];
-    }
-    let start = 0;
-    return pieData.map((item) => {
-      const ratio = item.value / pieTotal;
-      const end = start + ratio * 360;
-      const segment = { ...item, start, end };
-      start = end;
-      return segment;
-    });
-  }, [pieData, pieTotal]);
-
-  const pieStyle = useMemo(() => {
-    if (pieTotal <= 0) {
-      return {};
-    }
-    let start = 0;
-    const segments = pieData.map((item) => {
-      const ratio = item.value / pieTotal;
-      const end = start + ratio * 360;
-      const segment = `${item.color} ${start.toFixed(2)}deg ${end.toFixed(2)}deg`;
-      start = end;
-      return segment;
-    });
-    return {
-      background: `conic-gradient(${segments.join(", ")})`,
-    };
-  }, [pieData, pieTotal]);
-
-  useEffect(() => {
-    setPieHover(null);
-  }, [pieTotal, compareMetric]);
 
   const monthRowsByYear = useMemo(() => {
     const map = { [year]: monthRows };
@@ -383,7 +362,6 @@ export default function CerementSummaryClient({ year: yearProp }) {
     );
   }, [year]);
 
-  const hasSeries = chartSeries.length > 0;
   const showAnyChart = showLineChart || showBarChart || showPieChart;
   const showLeftCharts = showLineChart || showBarChart;
   const chartRowClassName =
@@ -391,147 +369,29 @@ export default function CerementSummaryClient({ year: yearProp }) {
       ? styles.chartRow
       : `${styles.chartRow} ${styles.chartRowSingle}`;
 
-  useEffect(() => {
-    if (!hasSeries) {
-      setHoveredIndex(null);
-    }
-  }, [hasSeries]);
-
-  const chartData = useMemo(() => {
-    const width = 680;
-    const height = 240;
-    const padding = 28;
-    const allValues = chartSeries.flatMap((series) => {
+  const lineLabels = monthTabs.map((tab) => tab.label);
+  const lineSeries = useMemo(() => {
+    return chartSeries.map((series) => {
       const rows = monthRowsByYear[series.year] || [];
-      return rows.map((row) =>
-        series.valueKey === "total" ? row.total || 0 : row[series.valueKey] || 0
-      );
-    });
-    const maxTotal = Math.max(...allValues, 0);
-    const span = width - padding * 2;
-    const step = monthTabs.length > 1 ? span / (monthTabs.length - 1) : 0;
-
-    const pointsBySeries = chartSeries.reduce((acc, series) => {
-      const rows = monthRowsByYear[series.year] || [];
-      acc[series.key] = monthTabs.map((tab, index) => {
+      const values = monthTabs.map((tab, index) => {
         const row = rows[index];
-        const value = row
+        return row
           ? series.valueKey === "total"
             ? row.total || 0
             : row[series.valueKey] || 0
           : 0;
-        const ratio = maxTotal > 0 ? value / maxTotal : 0;
-        const x = padding + index * step;
-        const y = height - padding - ratio * (height - padding * 2);
-        return { x, y, value, label: tab.label };
       });
-      return acc;
-    }, {});
-
-    return { width, height, padding, step, pointsBySeries, maxTotal };
+      return {
+        key: series.key,
+        values,
+        color: series.color,
+        dashed: series.dashed,
+      };
+    });
   }, [chartSeries, monthRowsByYear]);
-
-  const gridLines = useMemo(() => {
-    const steps = [0, 0.25, 0.5, 0.75, 1];
-    return steps.map((ratio) => {
-      const y =
-        chartData.height -
-        chartData.padding -
-        ratio * (chartData.height - chartData.padding * 2);
-      return { ratio, y };
-    });
-  }, [chartData]);
-
-  const hoverPoint = useMemo(() => {
-    if (hoveredIndex === null) {
-      return null;
-    }
-    const anchorSeries =
-      chartSeries.find(
-        (series) => series.year === year && series.valueKey === "total"
-      ) || chartSeries[0];
-    const basePoints = anchorSeries
-      ? chartData.pointsBySeries[anchorSeries.key]
-      : null;
-    if (!basePoints || !basePoints[hoveredIndex]) {
-      return null;
-    }
-    const row = monthRows[hoveredIndex];
-    if (!row) {
-      return null;
-    }
-    return {
-      x: basePoints[hoveredIndex].x,
-      label: row.label,
-      values: chartSeries.map((series) => {
-        const rows = monthRowsByYear[series.year] || [];
-        const targetRow = rows[hoveredIndex];
-        const hasEntry = targetRow?.hasEntry;
-        const value = hasEntry
-          ? series.valueKey === "total"
-            ? targetRow.total || 0
-            : targetRow[series.valueKey] || 0
-          : null;
-        return {
-          key: series.key,
-          label: series.label,
-          color: series.color,
-          value,
-        };
-      }),
-    };
-  }, [chartData, chartSeries, hoveredIndex, monthRows, monthRowsByYear, year]);
-
-  function handleChartMove(event) {
-    if (!hasSeries) {
-      setHoveredIndex(null);
-      return;
-    }
-    if (!chartData.step) {
-      setHoveredIndex(0);
-      return;
-    }
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clientX = event.touches?.[0]?.clientX ?? event.clientX;
-    const ratio = (clientX - rect.left) / rect.width;
-    const x = ratio * chartData.width;
-    const index = Math.round((x - chartData.padding) / chartData.step);
-    setHoveredIndex(clamp(index, 0, monthTabs.length - 1));
-  }
-
-  function handlePieMove(event) {
-    if (pieTotal <= 0 || pieSegments.length === 0) {
-      setPieHover(null);
-      return;
-    }
-    const rect = event.currentTarget.getBoundingClientRect();
-    const clientX = event.touches?.[0]?.clientX ?? event.clientX;
-    const clientY = event.touches?.[0]?.clientY ?? event.clientY;
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const dx = clientX - centerX;
-    const dy = clientY - centerY;
-    const radius = Math.min(rect.width, rect.height) / 2;
-    if (dx * dx + dy * dy > radius * radius) {
-      setPieHover(null);
-      return;
-    }
-
-    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-    const normalized = (angle + 450) % 360;
-    const index = pieSegments.findIndex(
-      (segment) => normalized >= segment.start && normalized < segment.end
-    );
-    if (index === -1) {
-      setPieHover(null);
-      return;
-    }
-    setPieHover({
-      index,
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    });
-  }
+  const lineMax = useMemo(() => {
+    return Math.max(...lineSeries.flatMap((series) => series.values), 0);
+  }, [lineSeries]);
 
   function handleCompareToggle(yearValue) {
     const isActive = compareYears.includes(yearValue);
@@ -626,8 +486,8 @@ export default function CerementSummaryClient({ year: yearProp }) {
                     </div>
                     <div className={styles.chartHeaderActions}>
                       <span className={styles.chartNote}>
-                        {chartData.maxTotal > 0
-                          ? `Peak ${formatMoney(chartData.maxTotal)}`
+                        {lineMax > 0
+                          ? `Peak ${formatMoney(lineMax)}`
                           : "No totals yet"}
                       </span>
                     </div>
@@ -644,174 +504,59 @@ export default function CerementSummaryClient({ year: yearProp }) {
                     ))}
                   </div>
                   <div className={styles.chartWrap}>
-                    {hasSeries ? (
-                      <>
-                        <svg
-                          className={styles.chartSvg}
-                          viewBox={`0 0 ${chartData.width} ${chartData.height}`}
-                          role="img"
-                          aria-label="Monthly total line chart"
-                          onMouseMove={handleChartMove}
-                          onMouseLeave={() => setHoveredIndex(null)}
-                          onTouchMove={handleChartMove}
-                          onTouchEnd={() => setHoveredIndex(null)}
-                        >
-                          <title>Monthly cerement totals</title>
-                          {gridLines.map((line) => (
-                            <line
-                              key={line.ratio}
-                              className={styles.chartGrid}
-                              x1={chartData.padding}
-                              x2={chartData.width - chartData.padding}
-                              y1={line.y}
-                              y2={line.y}
-                            />
-                          ))}
-                          {hoverPoint ? (
-                            <line
-                              className={styles.chartHoverLine}
-                              x1={hoverPoint.x}
-                              x2={hoverPoint.x}
-                              y1={chartData.padding}
-                              y2={chartData.height - chartData.padding}
-                            />
-                          ) : null}
-                          {chartSeries.map((series) => {
-                            const points =
-                              chartData.pointsBySeries[series.key] || [];
-                            return (
-                              <g key={series.key}>
-                                <polyline
-                                  className={`${styles.chartLine} ${
-                                    series.emphasis ? styles.chartLineTotal : ""
-                                  } ${series.dashed ? styles.chartLineCompare : ""}`}
-                                  style={{ stroke: series.color }}
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  points={points
-                                    .map((point) => `${point.x},${point.y}`)
-                                    .join(" ")}
-                                />
-                                {points.map((point, index) => (
-                                  <circle
-                                    key={`${series.key}-${point.label}`}
-                                    className={`${styles.chartDot} ${
-                                      hoveredIndex === index
-                                        ? styles.chartDotActive
-                                        : ""
-                                    }`}
-                                    style={{ fill: series.color }}
-                                    cx={point.x}
-                                    cy={point.y}
-                                    r={hoveredIndex === index ? 5 : 3}
-                                  />
-                                ))}
-                              </g>
-                            );
-                          })}
-                        </svg>
-                        {hoverPoint ? (
-                          <div
-                            className={styles.chartTooltip}
-                            style={{
-                              left: `${(hoverPoint.x / chartData.width) * 100}%`,
-                            }}
-                          >
-                            <div className={styles.tooltipTitle}>
-                              {hoverPoint.label}
-                            </div>
-                            {hoverPoint.values.map((item) => (
-                              <div key={item.key} className={styles.tooltipRow}>
-                                <span
-                                  className={styles.tooltipSwatch}
-                                  style={{ background: item.color }}
-                                />
-                                <span>{item.label}</span>
-                                <span className={styles.tooltipValue}>
-                                  {formatMoney(item.value)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
-                        <div className={styles.chartLabels}>
-                          {(chartData.pointsBySeries[chartSeries[0]?.key] || []).map(
-                            (point) => (
-                              <span key={point.label} className={styles.chartLabel}>
-                                {point.label}
-                              </span>
-                            )
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <div className={styles.chartEmpty}>
-                        Select at least one line to display.
-                      </div>
-                    )}
+                    <LineChart
+                      labels={lineLabels}
+                      series={lineSeries}
+                      width={680}
+                      height={240}
+                      padding={28}
+                      maxValue={lineMax}
+                      ariaLabel="Monthly total line chart"
+                      emptyLabel="No totals yet."
+                    />
                   </div>
                 </section>
               ) : null}
 
               {showBarChart ? (
                 <section className={styles.barCard}>
-                <div className={styles.barHeader}>
-                  <div>
-                    <h3>{`Monthly bars · ${compareMetricLabel}`}</h3>
-                    <p>
-                      {compareMetric === "total"
-                        ? "Store totals grouped by month."
-                        : "Selected store totals by month."}
-                    </p>
+                  <div className={styles.barHeader}>
+                    <div>
+                      <h3>{`Monthly bars · ${compareMetricLabel}`}</h3>
+                      <p>
+                        {compareMetric === "total"
+                          ? "Store totals grouped by month."
+                          : "Selected store totals by month."}
+                      </p>
+                    </div>
+                    <span>
+                      {barMax > 0 ? `Max ${formatMoney(barMax)}` : "No totals"}
+                    </span>
                   </div>
-                  <span>
-                    {barMax > 0 ? `Max ${formatMoney(barMax)}` : "No totals"}
-                  </span>
-                </div>
-                {compareMetric === "total" ? (
-                  <div className={styles.barLegend}>
-                    {amountColumns.map((column, index) => (
-                      <span key={column.key} className={styles.legendItem}>
-                        <span
-                          className={styles.legendSwatch}
-                          style={{
-                            background: barPalette[index % barPalette.length],
-                          }}
-                        />
-                        {column.label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-                  <div className={styles.barChart}>
-                    {barGroups.map((group) => (
-                      <div key={group.label} className={styles.barGroup}>
-                        <div className={styles.barGroupBars}>
-                          {group.values.map((item) => (
-                            <div key={item.key} className={styles.barItem}>
-                              <span className={styles.barTooltip}>
-                                {item.label}: {formatMoney(item.value)}
-                              </span>
-                              <div
-                                className={styles.barFill}
-                                style={{
-                                  height: barMax
-                                    ? `${Math.max(
-                                        (item.value / barMax) * 100,
-                                        6
-                                      )}%`
-                                    : "0%",
-                                  background: item.color,
-                                }}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                        <span className={styles.barLabel}>{group.label}</span>
-                      </div>
-                    ))}
-                  </div>
+                  {compareMetric === "total" ? (
+                    <div className={styles.barLegend}>
+                      {amountColumns.map((column, index) => (
+                        <span key={column.key} className={styles.legendItem}>
+                          <span
+                            className={styles.legendSwatch}
+                            style={{
+                              background: barPalette[index % barPalette.length],
+                            }}
+                          />
+                          {column.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  <BarChart
+                    groups={barGroups}
+                    maxValue={barMax}
+                    columns={12}
+                    formatValue={formatMoney}
+                    formatValueLabel={formatCompactMoney}
+                    chartHeight={220}
+                    ariaLabel={`Monthly bars · ${compareMetricLabel}`}
+                  />
                 </section>
               ) : null}
             </div>
@@ -823,64 +568,17 @@ export default function CerementSummaryClient({ year: yearProp }) {
                     <h3>{`Monthly mix · ${compareMetricLabel}`}</h3>
                     <p>Share of the selected metric across months.</p>
                   </div>
+                  <span className={styles.chartNote}>
+                    {formatMoney(pieTotal)}
+                  </span>
                 </div>
-                <div className={styles.pieLayout}>
-                <div
-                  className={styles.pieChart}
-                  style={pieTotal > 0 ? pieStyle : undefined}
-                  onMouseMove={handlePieMove}
-                  onMouseLeave={() => setPieHover(null)}
-                  onTouchMove={handlePieMove}
-                  onTouchEnd={() => setPieHover(null)}
-                >
-                  {pieTotal > 0 ? (
-                    <span className={styles.pieCenter}>
-                      {formatMoney(pieTotal)}
-                    </span>
-                  ) : (
-                    <span>No data</span>
-                  )}
-                  {pieHover && pieSegments[pieHover.index] ? (
-                    <div
-                      className={styles.pieTooltip}
-                      style={{ left: pieHover.x, top: pieHover.y }}
-                    >
-                      <div className={styles.pieTooltipTitle}>
-                        {pieSegments[pieHover.index].label}
-                      </div>
-                      <div className={styles.pieTooltipValue}>
-                        {formatMoney(pieSegments[pieHover.index].value)}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-                  <div className={styles.pieLegend}>
-                    {pieData.length > 0 ? (
-                      pieData.map((item) => {
-                        const percent = pieTotal
-                          ? ((item.value / pieTotal) * 100).toFixed(1)
-                          : "0.0";
-                        const percentLabel = percent.replace(/\.0$/, "");
-                        return (
-                          <div key={item.label} className={styles.pieLegendItem}>
-                            <span
-                              className={styles.pieSwatch}
-                              style={{ background: item.color }}
-                            />
-                            <div>
-                              <strong>{item.label}</strong>
-                              <span>
-                                {formatMoney(item.value)} · {percentLabel}%
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className={styles.pieEmpty}>No data to display.</div>
-                    )}
-                  </div>
-                </div>
+                <PieChart
+                  data={pieData}
+                  palette={piePalette}
+                  formatValue={formatMoney}
+                  formatPercent={formatPercent}
+                  emptyLabel="No data to display."
+                />
               </section>
             ) : null}
           </div>

@@ -116,7 +116,8 @@
 }
 
 .chartSection {
-  display: grid;
+  display: flex;
+  align-items: baseline;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
 }
@@ -130,8 +131,9 @@
   box-shadow: 0 18px 34px var(--shadow);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   gap: 16px;
-  height: 100%;
+  width: 50%;
 }
 
 .barHeader {
@@ -158,9 +160,7 @@
   gap: 10px;
   align-items: end;
   min-height: 220px;
-  flex: 1;
-  height: 100%;
-  min-height: 0;
+  height: 80%;
 }
 
 .barItem {
@@ -189,7 +189,7 @@
 
 .barFill {
   width: 100%;
-  border-radius: 999px;
+  border-radius: 4px 4px 1px 1px;
   background: linear-gradient(180deg, var(--accent), var(--accent-strong));
   min-height: 6px;
   transition: height 0.3s ease;

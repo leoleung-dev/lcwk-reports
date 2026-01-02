@@ -1,0 +1,564 @@
+.page {
+  max-width: none;
+  margin: 0 auto;
+  padding: 64px 6vw 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.header h1 {
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: var(--muted);
+  max-width: 520px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-strong);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.status {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.statusError {
+  color: #a02c2c;
+  background: rgba(160, 44, 44, 0.08);
+  border: 1px solid rgba(160, 44, 44, 0.35);
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.sectionHeader h2 {
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.sectionHeader p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.chartTitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-weight: 700;
+  justify-content: center;
+  text-align: center;
+}
+
+.chartTitleMetric {
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.chartTitleYears {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 1.15rem;
+}
+
+.chartTitleYear {
+  color: var(--year-color);
+  font-weight: 700;
+}
+
+.chartTitleSep {
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 6px;
+}
+
+.sectionControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.control select {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 6px 12px;
+  background: white;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.yearChecklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.yearOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: white;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.yearOption input {
+  accent-color: var(--accent-strong);
+}
+
+.metricToggle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metricButton {
+  border: 1px solid rgba(163, 91, 42, 0.35);
+  background: rgba(163, 91, 42, 0.08);
+  color: var(--accent-strong);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.metricActive {
+  background: var(--accent-strong);
+  color: white;
+  border-color: var(--accent-strong);
+}
+
+.versusCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 20px;
+  box-shadow: 0 20px 40px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.versusLegend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legendMeta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.legendNote {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.emptyPanel {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+}
+
+.chartNote {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.barChart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 18px 12px;
+  align-items: end;
+  min-height: 320px;
+  overflow: visible;
+  padding: 20px 4px 12px;
+}
+
+.barGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 100%;
+  min-width: 0;
+}
+
+.barGroupSpotlight .barLabel {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.barGroupSpotlight {
+  background: rgba(163, 91, 42, 0.08);
+  border: 1px solid rgba(163, 91, 42, 0.2);
+  border-radius: 12px;
+  padding: 24px 6px 6px;
+}
+
+.barGroupBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 240px;
+  width: 100%;
+}
+
+.barItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  height: 100%;
+  border-radius: 10px;
+  padding: 0;
+  border: 1px solid transparent;
+  color: var(--muted);
+  position: relative;
+  flex: 1;
+}
+
+.barItem:hover {
+  border-color: rgba(163, 91, 42, 0.35);
+}
+
+.barFill {
+  width: 100%;
+  border-radius: 4px 4px 1px 1px;
+  min-height: 4px;
+  transition: height 0.3s ease;
+  height: var(--bar-height, 0%);
+  background: var(--bar-color, var(--accent-strong));
+}
+
+.barTooltip {
+  position: absolute;
+  top: auto;
+  bottom: calc(var(--bar-height, 0%) + 24px);
+  background: var(--accent-strong);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.barItem:hover .barTooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.barValue {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bar-height, 0%) + 4px);
+  font-size: 0.65rem;
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.barLabel {
+  font-size: 0.75rem;
+  text-align: center;
+  word-break: break-word;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: normal;
+}
+
+.yearGrid {
+  display: grid;
+  gap: 22px;
+}
+
+.yearCard {
+  background: rgba(255, 250, 242, 0.4);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 8px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.yearHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.yearHeader h3 {
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.yearTotal {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.yearControls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.overviewLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.25fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.overviewLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.chartCard,
+.pieCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 18px;
+  box-shadow: 0 18px 34px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chartHeader h4 {
+  font-family: "Spectral", "Times New Roman", serif;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.chartHeader span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+  background: rgba(255, 250, 242, 0.6);
+  border-radius: 16px;
+}
+
+.chartGrid {
+  stroke: rgba(122, 63, 30, 0.15);
+  stroke-width: 1;
+}
+
+.chartLine {
+  stroke: var(--accent-strong);
+  stroke-width: 2.5;
+}
+
+.chartDot {
+  fill: var(--accent-strong);
+}
+
+.chartLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chartEmpty {
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background: rgba(255, 250, 242, 0.6);
+}
+
+.pieLayout {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.pieChart {
+  width: clamp(240px, 30vw, 320px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: rgba(163, 91, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 600;
+  position: relative;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 4px;
+  align-items: flex-start;
+}
+
+.legend .legendItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.legend .legendSwatch {
+  border-radius: 50%;
+}
+
+.legendItem div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.legendItem strong {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .overviewLayout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .barChart {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    min-height: 280px;
+  }
+
+  .barGroupBars {
+    height: 210px;
+  }
+
+  .chartLabels {
+    font-size: 0.7rem;
+  }
+
+  .pieLayout {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 48px 5vw 72px;
+  }
+}

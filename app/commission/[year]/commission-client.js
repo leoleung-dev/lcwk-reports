@@ -861,7 +861,7 @@ export default function CommissionClient({ year: yearProp }) {
 
       <div className={styles.yearLabelRow}>
         <div className={styles.yearLabel}>{chineseYearLabel}</div>
-        <Link className={styles.summaryLink} href={`/commission/${year}/summary`}>
+        <Link className={styles.summaryLink} href={`/commission/summary/${year}`}>
           View annual summary
         </Link>
       </div>

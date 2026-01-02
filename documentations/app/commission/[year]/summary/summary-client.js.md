@@ -29,8 +29,9 @@ Client-side annual commission summary with charts, tables, and a toggle between 
     - Builds totals by month and handler, case counts, and overall totals.
     - Allows switching between Sales (總計) and Commission (Total Commission) metrics.
     - Uses month tabs and bar-chart clicks to focus a specific month or “All Year”.
+    - Places the Overall link to the left of the year navigation controls in the header.
     - Renders charts on top and table summaries below.
-  - Usage: Rendered by `app/commission/[year]/summary/page.js`.
+  - Usage: Rendered by `app/commission/summary/[year]/page.js` (legacy route redirects).
 
 - `handleExportYear()`
   - Purpose: Export the entire year of commission entries.

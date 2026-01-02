@@ -4,7 +4,7 @@
   padding: 64px 6vw 96px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 32px;
 }
 
 .header {
@@ -49,8 +49,176 @@
 }
 
 .empty {
+  text-align: center;
   color: var(--muted);
   font-weight: 600;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.sectionHeader h2 {
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.sectionHeader p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.sectionControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.control select {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 6px 12px;
+  background: white;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.yearChecklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.yearOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: white;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.yearOption input {
+  accent-color: var(--accent-strong);
+}
+
+.chartTitle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-weight: 700;
+  justify-content: center;
+  text-align: center;
+}
+
+.chartTitleMetric {
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.chartTitleYears {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 1.15rem;
+}
+
+.chartTitleYear {
+  color: var(--year-color);
+  font-weight: 700;
+}
+
+.chartTitleSep {
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 6px;
+}
+
+.versusCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 20px;
+  box-shadow: 0 20px 40px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.versusLegend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.legendMeta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.emptyPanel {
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+}
+
+.yearGrid {
+  display: grid;
+  gap: 22px;
+}
+
+.yearCard {
+  background: rgba(255, 250, 242, 0.4);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 8px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .yearSection {
@@ -71,7 +239,7 @@
   flex-wrap: wrap;
 }
 
-.yearHeader h2 {
+.yearHeader h3 {
   font-family: "Spectral", "Times New Roman", serif;
   font-size: 1.5rem;
   margin: 0;
@@ -111,6 +279,19 @@
   gap: 20px;
 }
 
+.overviewLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1.25fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.overviewLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .chartRow {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
@@ -139,17 +320,17 @@
   flex-wrap: wrap;
 }
 
-.chartHeader h3,
-.pieHeader h3 {
+.chartHeader h4,
+.pieHeader h4 {
   font-family: "Spectral", "Times New Roman", serif;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin: 0;
 }
 
 .chartHeader span,
 .pieHeader span {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .chartWrap {
@@ -276,13 +457,13 @@
   font-size: 0.8rem;
 }
 
-.legendItem {
+.barLegend .legendItem {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.legendSwatch {
+.barLegend .legendSwatch {
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -463,7 +644,8 @@
 }
 
 @media (max-width: 900px) {
-  .chartContent {
+  .chartContent,
+  .overviewLayout {
     grid-template-columns: 1fr;
   }
 }

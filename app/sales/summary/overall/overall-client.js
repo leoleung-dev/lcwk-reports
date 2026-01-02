@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import BarChart from "@/app/components/charts/BarChart";
+import LineChart from "@/app/components/charts/LineChart";
+import PieChart from "@/app/components/charts/PieChart";
 import styles from "./Overall.module.css";
 
 const monthLabels = [
@@ -24,47 +27,71 @@ const moneyFormatter = new Intl.NumberFormat("en-HK", {
   maximumFractionDigits: 2,
 });
 
+const compactMoneyFormatter = new Intl.NumberFormat("en-HK", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+const yearPalette = [
+  "#a35b2a",
+  "#d4a373",
+  "#7a3f1e",
+  "#b07d62",
+  "#9c6644",
+  "#cb997e",
+  "#6f4e37",
+  "#ce8a52",
+  "#8a5a44",
+  "#b5651d",
+];
+
+const piePalette = [
+  "#a35b2a",
+  "#ce8a52",
+  "#7a3f1e",
+  "#d4a373",
+  "#6f4e37",
+  "#b5651d",
+  "#9c6644",
+  "#cb997e",
+  "#8a5a44",
+  "#b07d62",
+  "#6b4226",
+  "#d7b08b",
+];
+
 function formatMoney(value) {
   const amount = Number(value || 0);
   return `$${moneyFormatter.format(amount)}`;
 }
 
-function formatMonthLabel(value) {
-  const monthText = String(value || "");
-  const monthNumber = Number(monthText.slice(-2));
-  if (!monthNumber || monthNumber < 1 || monthNumber > 12) {
-    return "-";
+function formatCompactMoney(value) {
+  const amount = Number(value || 0);
+  return `$${compactMoneyFormatter.format(amount)}`;
+}
+
+function formatPercent(value) {
+  const percent = Number(value);
+  if (!Number.isFinite(percent)) {
+    return "0%";
   }
-  return monthLabels[monthNumber - 1];
+  const scaled = percent * 100;
+  return `${scaled.toFixed(1).replace(/\.0$/, "")}%`;
 }
 
-function buildLineData(items) {
-  const width = 720;
-  const height = 260;
-  const padding = 32;
-  const values = items.map((item) => item.total);
-  const maxTotal = Math.max(...values, 0);
-  const span = width - padding * 2;
-  const step = items.length > 1 ? span / (items.length - 1) : 0;
-  const points = values.map((value, index) => {
-    const ratio = maxTotal > 0 ? value / maxTotal : 0;
-    const x = padding + index * step;
-    const y = height - padding - ratio * (height - padding * 2);
-    return { x, y, label: items[index].year, value };
+function buildMonthTotals(months) {
+  const totalsByMonth = {};
+  (months || []).forEach((row) => {
+    totalsByMonth[row.month] = Number(row.total || 0);
   });
-  const gridLines = [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-    const y = height - padding - ratio * (height - padding * 2);
-    return { ratio, y };
-  });
-
-  return { width, height, padding, points, maxTotal, gridLines };
+  return totalsByMonth;
 }
-
 export default function SalesSummaryOverallClient() {
   const [years, setYears] = useState([]);
   const [summariesByYear, setSummariesByYear] = useState({});
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedYears, setSelectedYears] = useState([]);
 
   useEffect(() => {
     async function loadYears() {
@@ -129,47 +156,91 @@ export default function SalesSummaryOverallClient() {
   }, [years]);
 
   const orderedYears = useMemo(() => {
-    return [...years].sort();
+    return [...years].sort((a, b) => b.localeCompare(a));
   }, [years]);
 
-  const yearSummaries = useMemo(() => {
-    return orderedYears.map((year) => {
-      const months = summariesByYear[year] || [];
-      const total = months.reduce((sum, item) => sum + Number(item.total || 0), 0);
-      const monthsWithData = months.filter((item) => Number(item.total || 0) > 0)
-        .length;
-      const average = months.length ? total / months.length : 0;
-      const bestMonth = months.reduce(
-        (best, item) =>
-          Number(item.total || 0) > Number(best.total || 0) ? item : best,
-        { total: 0, month: "" }
-      );
-      return {
-        year,
-        months,
-        total,
-        average,
-        monthsWithData,
-        bestMonth,
-      };
+  useEffect(() => {
+    if (years.length === 0) {
+      return;
+    }
+    const sorted = [...years].sort((a, b) => b.localeCompare(a));
+    setSelectedYears((prev) => {
+      const valid = prev.filter((year) => sorted.includes(year));
+      if (valid.length > 0) {
+        return valid;
+      }
+      return sorted.slice(0, 2);
     });
-  }, [orderedYears, summariesByYear]);
+  }, [years]);
 
-  const summariesWithData = yearSummaries.filter((item) => item.total > 0);
-  const hasData = summariesWithData.length > 0;
-  const totalAllYears = summariesWithData.reduce(
-    (sum, item) => sum + item.total,
-    0
-  );
-  const bestYear = summariesWithData.reduce(
-    (best, item) => (item.total > (best?.total || 0) ? item : best),
-    null
-  );
-  const averageYear = hasData ? totalAllYears / summariesWithData.length : 0;
-  const lineData = useMemo(
-    () => buildLineData(summariesWithData),
-    [summariesWithData]
-  );
+  const selectedYearsOrdered = useMemo(() => {
+    return [...selectedYears]
+      .filter((year) => years.includes(year))
+      .sort((a, b) => a.localeCompare(b));
+  }, [selectedYears, years]);
+
+  function toggleYear(year) {
+    setSelectedYears((prev) => {
+      if (prev.includes(year)) {
+        return prev.filter((value) => value !== year);
+      }
+      return [...prev, year];
+    });
+  }
+
+  const versusData = useMemo(() => {
+    if (selectedYearsOrdered.length === 0) {
+      return {
+        groups: [],
+        maxTotal: 0,
+        totalsByYear: {},
+        selectedYears: [],
+      };
+    }
+
+    const totalsByYear = {};
+    const totalsByMonthYear = {};
+    selectedYearsOrdered.forEach((year) => {
+      totalsByYear[year] = 0;
+      totalsByMonthYear[year] = Array.from({ length: 12 }, () => 0);
+      const months = summariesByYear[year] || [];
+      months.forEach((item) => {
+        const monthIndex = Number(String(item.month || "").slice(-2)) - 1;
+        if (monthIndex < 0 || monthIndex >= 12) {
+          return;
+        }
+        const value = Number(item.total || 0);
+        totalsByMonthYear[year][monthIndex] = value;
+        totalsByYear[year] += value;
+      });
+    });
+
+    const maxTotal = Math.max(
+      ...selectedYearsOrdered.flatMap((year) => totalsByMonthYear[year]),
+      0
+    );
+    const groups = monthLabels.map((label, index) => ({
+      key: `month-${index}`,
+      label,
+      bars: selectedYearsOrdered.map((year, yearIndex) => ({
+        key: `${year}-${label}`,
+        label: year,
+        value: totalsByMonthYear[year][index] || 0,
+        color: yearPalette[yearIndex % yearPalette.length],
+        tooltipLabel: year,
+      })),
+    }));
+
+    return {
+      groups,
+      maxTotal,
+      totalsByYear,
+      selectedYears: selectedYearsOrdered,
+    };
+  }, [summariesByYear, selectedYearsOrdered]);
+
+  const hasVersusRows = versusData.groups.length > 0;
+  const hasYearData = orderedYears.length > 0;
 
   return (
     <main className={styles.page}>
@@ -179,7 +250,7 @@ export default function SalesSummaryOverallClient() {
             ← Back to sales
           </Link>
           <h1>Sales Overall Summary</h1>
-          <p>Annual sales totals and year-over-year trends.</p>
+          <p>Compare yearly sales performance and review monthly trends.</p>
         </div>
       </header>
 
@@ -189,132 +260,208 @@ export default function SalesSummaryOverallClient() {
         <div className={styles.empty}>No sales data yet.</div>
       ) : null}
 
-      {hasData ? (
+      {hasYearData ? (
         <>
-          <section className={styles.stats}>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Years with data</span>
-              <strong>{summariesWithData.length}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Total revenue</span>
-              <strong>{formatMoney(totalAllYears)}</strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Best year</span>
-              <strong>
-                {bestYear
-                  ? `${bestYear.year} - ${formatMoney(bestYear.total)}`
-                  : "-"}
-              </strong>
-            </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Average per year</span>
-              <strong>{formatMoney(averageYear)}</strong>
-            </div>
-          </section>
-
-          <section className={styles.chartCard}>
-            <div className={styles.chartHeader}>
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
               <div>
-                <h2>Yearly totals trend</h2>
-                <p>Track growth across each recorded year.</p>
+                <h2>Versus</h2>
+                <p>Compare monthly sales totals across selected years.</p>
               </div>
-              <span>
-                {lineData.maxTotal > 0
-                  ? `Peak ${formatMoney(lineData.maxTotal)}`
-                  : "No totals"}
-              </span>
-            </div>
-            {lineData.maxTotal > 0 ? (
-              <>
-                <svg
-                  className={styles.chartSvg}
-                  viewBox={`0 0 ${lineData.width} ${lineData.height}`}
-                  role="img"
-                  aria-label="Yearly totals line chart"
-                >
-                  <title>Yearly sales totals</title>
-                  {lineData.gridLines.map((line) => (
-                    <line
-                      key={line.ratio}
-                      className={styles.chartGrid}
-                      x1={lineData.padding}
-                      x2={lineData.width - lineData.padding}
-                      y1={line.y}
-                      y2={line.y}
-                    />
-                  ))}
-                  <polyline
-                    className={styles.chartLine}
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    points={lineData.points
-                      .map((point) => `${point.x},${point.y}`)
-                      .join(" ")}
-                  />
-                  {lineData.points.map((point) => (
-                    <circle
-                      key={point.label}
-                      className={styles.chartDot}
-                      cx={point.x}
-                      cy={point.y}
-                      r="4"
-                    />
-                  ))}
-                </svg>
-                <div className={styles.chartLabels}>
-                  {lineData.points.map((point) => (
-                    <span key={point.label}>{point.label}</span>
-                  ))}
+              <div className={styles.sectionControls}>
+                <div className={styles.control}>
+                  Years
+                  <div className={styles.yearChecklist}>
+                    {orderedYears.map((year) => (
+                      <label key={year} className={styles.yearOption}>
+                        <input
+                          type="checkbox"
+                          checked={selectedYears.includes(year)}
+                          onChange={() => toggleYear(year)}
+                        />
+                        <span>{year}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className={styles.chartEmpty}>No data yet.</div>
-            )}
+              </div>
+            </div>
+
+            <div className={styles.versusCard}>
+              {!hasVersusRows ? (
+                <div className={styles.emptyPanel}>
+                  Select years to compare.
+                </div>
+              ) : (
+                <>
+                  <div className={styles.chartTitle}>
+                    <span className={styles.chartTitleMetric}>Sales:</span>
+                    <span className={styles.chartTitleYears}>
+                      {versusData.selectedYears.map((year, index) => (
+                        <span key={`title-${year}`}>
+                          {index > 0 ? (
+                            <span className={styles.chartTitleSep}>vs</span>
+                          ) : null}
+                          <span
+                            className={styles.chartTitleYear}
+                            style={{
+                              "--year-color":
+                                yearPalette[index % yearPalette.length],
+                            }}
+                          >
+                            {year}
+                          </span>
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                  <BarChart
+                    groups={versusData.groups}
+                    maxValue={versusData.maxTotal}
+                    columns={12}
+                    formatValue={formatMoney}
+                    formatValueLabel={formatCompactMoney}
+                    chartHeight={240}
+                    ariaLabel="Sales comparison by month"
+                  />
+                  <div className={styles.versusLegend}>
+                    {versusData.selectedYears.map((year, index) => (
+                      <div key={year} className={styles.legendItem}>
+                        <span
+                          className={styles.legendSwatch}
+                          style={{
+                            background: yearPalette[index % yearPalette.length],
+                          }}
+                        />
+                        <span>
+                          {year} · {formatMoney(versusData.totalsByYear[year])}
+                        </span>
+                      </div>
+                    ))}
+                    <span className={styles.legendMeta}>Sales totals</span>
+                  </div>
+                </>
+              )}
+            </div>
           </section>
 
-          <section className={styles.tableSection}>
-            <div className={styles.tableHeader}>
-              <h2>Yearly breakdown</h2>
-              <span className={styles.tableMeta}>
-                {summariesWithData.length} years
-              </span>
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <h2>Yearly overview</h2>
+                <p>Monthly trends plus totals and share for each year.</p>
+              </div>
             </div>
-            <div className={styles.tableWrap}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Year</th>
-                    <th className={styles.amount}>Total</th>
-                    <th className={styles.amount}>Average / month</th>
-                    <th>Best month</th>
-                    <th>Months with data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {summariesWithData.map((item) => (
-                    <tr key={item.year}>
-                      <td>{item.year}</td>
-                      <td className={styles.amount}>
-                        {formatMoney(item.total)}
-                      </td>
-                      <td className={styles.amount}>
-                        {formatMoney(item.average)}
-                      </td>
-                      <td>
-                        {item.bestMonth?.total
-                          ? `${formatMonthLabel(item.bestMonth.month)} - ${formatMoney(
-                              item.bestMonth.total
-                            )}`
-                          : "-"}
-                      </td>
-                      <td>{item.monthsWithData}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div className={styles.yearGrid}>
+              {orderedYears.map((year) => {
+                const months = summariesByYear[year] || [];
+                const totalsByMonth = buildMonthTotals(months);
+                const monthTotals = monthLabels.map((_, index) => {
+                  const monthKey = `${year}-${String(index + 1).padStart(2, "0")}`;
+                  return totalsByMonth[monthKey] || 0;
+                });
+                const lineMax = Math.max(...monthTotals, 0);
+                const yearTotal = monthTotals.reduce(
+                  (sum, value) => sum + value,
+                  0
+                );
+                const barGroups = monthLabels.map((label, index) => ({
+                  key: `${year}-${label}`,
+                  label,
+                  bars: [
+                    {
+                      key: `${year}-${label}-total`,
+                      value: monthTotals[index] || 0,
+                      color: piePalette[index % piePalette.length],
+                      tooltipLabel: label,
+                    },
+                  ],
+                }));
+                const barMax = Math.max(...monthTotals, 0);
+                const pieData = monthLabels
+                  .map((label, index) => ({
+                    label,
+                    value: monthTotals[index] || 0,
+                  }))
+                  .filter((item) => item.value > 0);
+
+                return (
+                  <article key={year} className={styles.yearCard}>
+                    <div className={styles.yearHeader}>
+                      <div>
+                        <h3>{year}</h3>
+                        <span className={styles.yearTotal}>
+                          {formatMoney(yearTotal)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className={styles.overviewLayout}>
+                      <div className={styles.overviewLeft}>
+                        <div className={styles.chartCard}>
+                          <div className={styles.chartHeader}>
+                            <h4>Sales monthly trend</h4>
+                            <span>
+                              {lineMax > 0
+                                ? `Peak ${formatMoney(lineMax)}`
+                                : "No totals"}
+                            </span>
+                          </div>
+                          <LineChart
+                            labels={monthLabels}
+                            series={[
+                              {
+                                key: `${year}-line`,
+                                values: monthTotals,
+                              },
+                            ]}
+                            width={640}
+                            height={220}
+                            padding={28}
+                            maxValue={lineMax}
+                            ariaLabel={`${year} sales monthly trend`}
+                          />
+                        </div>
+
+                        <div className={styles.chartCard}>
+                          <div className={styles.chartHeader}>
+                            <h4>Sales by month</h4>
+                            <span>{monthLabels.length} months</span>
+                          </div>
+                          <BarChart
+                            groups={barGroups}
+                            maxValue={barMax}
+                            columns={12}
+                            formatValue={formatMoney}
+                            formatValueLabel={formatCompactMoney}
+                            chartHeight={220}
+                            ariaLabel={`${year} sales by month`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.pieCard}>
+                        <div className={styles.chartHeader}>
+                          <h4>Sales share</h4>
+                          <span>
+                            {yearTotal > 0
+                              ? formatMoney(yearTotal)
+                              : "No data"}
+                          </span>
+                        </div>
+                        <PieChart
+                          data={pieData}
+                          palette={piePalette}
+                          formatValue={formatMoney}
+                          formatPercent={formatPercent}
+                          emptyLabel="No data."
+                        />
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         </>

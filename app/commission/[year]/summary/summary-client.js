@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import BarChart from "@/app/components/charts/BarChart";
+import PieChart from "@/app/components/charts/PieChart";
 import styles from "./Summary.module.css";
 
 const monthLabels = [
@@ -53,6 +55,11 @@ const moneyFormatter = new Intl.NumberFormat("en-HK", {
   maximumFractionDigits: 2,
 });
 
+const compactMoneyFormatter = new Intl.NumberFormat("en-HK", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 function isValidYear(value) {
   return /^\d{4}$/.test(value || "");
 }
@@ -63,6 +70,11 @@ function formatMoney(value) {
   }
   const amount = Number(value || 0);
   return `$${moneyFormatter.format(amount)}`;
+}
+
+function formatCompactMoney(value) {
+  const amount = Number(value || 0);
+  return `$${compactMoneyFormatter.format(amount)}`;
 }
 
 function formatPercent(value) {
@@ -229,14 +241,25 @@ export default function SummaryClient({ year: yearProp }) {
           <p>Commission totals and case counts across all handlers.</p>
         </div>
         <div className={styles.headerActions}>
-          <div className={styles.yearNav}>
-            <Link className={styles.yearLink} href={`/commission/${Number(year) - 1}/summary`}>
-              ← {Number(year) - 1}
+          <div className={styles.headerActionsTop}>
+            <Link className={styles.overallLink} href="/commission/summary/overall">
+              Overall
             </Link>
-            <div className={styles.yearBadge}>{year}</div>
-            <Link className={styles.yearLink} href={`/commission/${Number(year) + 1}/summary`}>
-              {Number(year) + 1} →
-            </Link>
+            <div className={styles.yearNav}>
+              <Link
+                className={styles.yearLink}
+                href={`/commission/summary/${Number(year) - 1}`}
+              >
+                ← {Number(year) - 1}
+              </Link>
+              <div className={styles.yearBadge}>{year}</div>
+              <Link
+                className={styles.yearLink}
+                href={`/commission/summary/${Number(year) + 1}`}
+              >
+                {Number(year) + 1} →
+              </Link>
+            </div>
           </div>
           <button
             type="button"
@@ -298,30 +321,27 @@ export default function SummaryClient({ year: yearProp }) {
             <h2>{year} {metricLabel} Summary by Month</h2>
             <span>Click a month to focus tables</span>
           </div>
-          <div className={styles.barChart}>
-            {months.map((month, index) => {
-              const total = dataMaps.totalsByMonth[month] || 0;
-              const height = maxTotal ? Math.max((total / maxTotal) * 100, 4) : 4;
-              const isActive = activeMonth === month;
-              return (
-                <button
-                  key={month}
-                  type="button"
-                  className={`${styles.barItem} ${
-                    isActive ? styles.barActive : ""
-                  }`}
-                  onClick={() => {
-                    setPieMonth(month);
-                  }}
-                  title={`${month}: ${formatMoney(total)}`}
-                >
-                  <span className={styles.barFill} style={{ height: `${height}%` }} />
-                  <span className={styles.barLabel}>{monthLabels[index]}</span>
-                  <span className={styles.barTooltip}>{formatMoney(total)}</span>
-                </button>
-              );
-            })}
-          </div>
+          <BarChart
+            groups={months.map((month, index) => ({
+              key: month,
+              label: monthLabels[index],
+              bars: [
+                {
+                  key: `${month}-total`,
+                  value: dataMaps.totalsByMonth[month] || 0,
+                  tooltipLabel: monthLabels[index],
+                },
+              ],
+            }))}
+            maxValue={maxTotal}
+            columns={12}
+            activeGroupKey={activeMonth || ""}
+            onGroupClick={(key) => setPieMonth(key)}
+            formatValue={formatMoney}
+            formatValueLabel={formatCompactMoney}
+            chartHeight={220}
+            ariaLabel={`${year} ${metricLabel} by month`}
+          />
         </div>
 
         <div className={styles.pieCard}>
@@ -329,47 +349,17 @@ export default function SummaryClient({ year: yearProp }) {
             <h3>
               Agent Mix ({metricLabel} · {selectedMonthLabel})
             </h3>
-            <label className={styles.pieFilter}>
-              View month
-              <select
-                value={pieMonth}
-                onChange={(event) => setPieMonth(event.target.value)}
-              >
-                <option value="all">All year</option>
-                {months.map((month, index) => (
-                  <option key={month} value={month}>
-                    {monthLabels[index]}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
-          <div className={styles.pieLayout}>
-            <div className={styles.pieChart} style={pieStyle}>
-              {pieTotal === 0 ? <span>No data</span> : null}
-            </div>
-            <div className={styles.legend}>
-              {pieData.length === 0 ? (
-                <p>No entries.</p>
-              ) : (
-                pieData.map((item, index) => (
-                  <div key={item.handler} className={styles.legendItem}>
-                    <span
-                      className={styles.legendSwatch}
-                      style={{ background: palette[index % palette.length] }}
-                    />
-                    <div>
-                      <strong>{item.handler}</strong>
-                      <span>
-                        {formatMoney(item.total)} (
-                        {formatPercent(item.total / (pieTotal || 1))})
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <PieChart
+            data={pieData.map((item) => ({
+              label: item.handler,
+              value: item.total,
+            }))}
+            palette={palette}
+            formatValue={formatMoney}
+            formatPercent={formatPercent}
+            emptyLabel="No entries."
+          />
         </div>
       </section>
 

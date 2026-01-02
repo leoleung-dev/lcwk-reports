@@ -603,6 +603,14 @@
   gap: 16px;
 }
 
+.pieHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .pieHeader h3 {
   font-family: "Spectral", "Times New Roman", serif;
   font-size: 1.2rem;

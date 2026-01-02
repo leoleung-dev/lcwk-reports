@@ -1,0 +1,222 @@
+.barChart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 18px 12px;
+  align-items: end;
+  min-height: 240px;
+  overflow: visible;
+  padding: 48px 4px 12px;
+}
+
+.barGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 100%;
+  min-width: 0;
+}
+
+.barGroupActive {
+  background: rgba(163, 91, 42, 0.08);
+  border: 1px solid rgba(163, 91, 42, 0.35);
+  border-radius: 12px;
+  padding: 12px 6px 6px;
+}
+
+.barGroupBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: var(--bar-group-height, 240px);
+  width: 100%;
+}
+
+.barItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: stretch;
+  height: 100%;
+  border-radius: 10px;
+  padding: 0;
+  border: 1px solid transparent;
+  color: var(--muted);
+  position: relative;
+  flex: 1;
+  background: transparent;
+}
+
+.barItemButton {
+  cursor: pointer;
+}
+
+.barItem:hover,
+.barItem:focus-visible {
+  border-color: rgba(163, 91, 42, 0.35);
+  outline: none;
+}
+
+.barFill {
+  width: 100%;
+  border-radius: 4px 4px 1px 1px;
+  background: var(
+    --bar-color,
+    linear-gradient(180deg, var(--accent), var(--accent-strong))
+  );
+  min-height: 6px;
+  transition: height 0.3s ease;
+  height: var(--bar-height, 0%);
+}
+
+.barValue {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bar-height, 0%) + 4px);
+  font-size: 0.65rem;
+  color: var(--ink);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.barTooltip {
+  position: absolute;
+  top: auto;
+  bottom: calc(var(--bar-height, 0%) + 24px);
+  background: var(--accent-strong);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.barItem:hover .barTooltip,
+.barItem:focus-visible .barTooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.barLabel {
+  font-size: 0.75rem;
+  text-align: center;
+  word-break: break-word;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: normal;
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+  background: rgba(255, 250, 242, 0.6);
+  border-radius: 16px;
+}
+
+.chartGrid {
+  stroke: rgba(122, 63, 30, 0.15);
+  stroke-width: 1;
+}
+
+.chartLine {
+  stroke: var(--accent-strong);
+  stroke-width: 2.5;
+}
+
+.chartLineDashed {
+  stroke-dasharray: 6 6;
+}
+
+.chartDot {
+  fill: var(--accent-strong);
+}
+
+.chartLabels {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chartEmpty {
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  background: rgba(255, 250, 242, 0.6);
+}
+
+.pieLayout {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.pieChart {
+  width: clamp(240px, 30vw, 320px);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: rgba(163, 91, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 600;
+  position: relative;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legendItem {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.legendItem strong {
+  display: block;
+  font-size: 0.9rem;
+}
+
+.legendItem span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.legendSwatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .barChart {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+    min-height: 220px;
+  }
+
+  .barGroupBars {
+    height: 200px;
+  }
+}
