@@ -541,7 +541,7 @@ export default function CerementClient({ year: yearProp }) {
 
       <div className={styles.yearLabelRow}>
         <div className={styles.yearLabel}>{chineseYearLabel}</div>
-        <Link className={styles.summaryLink} href={`/cerement/${year}/summary`}>
+        <Link className={styles.summaryLink} href={`/cerement/summary/${year}`}>
           View annual summary
         </Link>
       </div>

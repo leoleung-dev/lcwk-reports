@@ -1,5 +1,5 @@
 .page {
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
   padding: 64px 6vw 96px;
   display: flex;
@@ -80,6 +80,17 @@
   gap: 12px;
 }
 
+.overallLink {
+  border: 1px solid rgba(163, 91, 42, 0.35);
+  background: rgba(163, 91, 42, 0.08);
+  color: var(--accent-strong);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
 .yearLink {
   color: var(--accent-strong);
   font-weight: 600;
@@ -120,6 +131,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%;
 }
 
 .barHeader {
@@ -146,6 +158,9 @@
   gap: 10px;
   align-items: end;
   min-height: 220px;
+  flex: 1;
+  height: 100%;
+  min-height: 0;
 }
 
 .barItem {
@@ -208,15 +223,15 @@
 }
 
 .pieLayout {
-  display: grid;
-  grid-template-columns: 180px 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
   align-items: center;
 }
 
 .pieChart {
-  width: 180px;
-  height: 180px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   background: rgba(163, 91, 42, 0.08);
   display: flex;
@@ -227,15 +242,31 @@
 }
 
 .legend {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px 10px;
+  width: 100%;
 }
 
 .legendItem {
   display: flex;
   gap: 10px;
   align-items: center;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.legendItem:hover,
+.legendItem:focus-visible {
+  border-color: rgba(163, 91, 42, 0.35);
+  background: rgba(163, 91, 42, 0.06);
 }
 
 .legendItem strong {
@@ -326,13 +357,6 @@
   text-align: center;
   color: var(--muted);
   padding: 28px;
-}
-
-@media (max-width: 900px) {
-  .pieLayout {
-    grid-template-columns: 1fr;
-    justify-items: center;
-  }
 }
 
 @media (max-width: 700px) {

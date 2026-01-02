@@ -1,6 +1,9 @@
-import SummaryClient from "./summary-client";
+import { redirect } from "next/navigation";
 
 export default async function SalesSummaryPage({ params }) {
   const resolvedParams = await params;
-  return <SummaryClient year={resolvedParams?.year} />;
+  if (!resolvedParams?.year) {
+    redirect("/sales");
+  }
+  redirect(`/sales/summary/${resolvedParams.year}`);
 }

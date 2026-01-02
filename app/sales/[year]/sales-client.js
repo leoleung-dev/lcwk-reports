@@ -811,7 +811,7 @@ function normalizeDate(value, fallbackYear) {
 
       <div className={styles.yearLabelRow}>
         <div className={styles.yearLabel}>{chineseYearLabel}</div>
-        <Link className={styles.summaryLink} href={`/sales/${year}/summary`}>
+        <Link className={styles.summaryLink} href={`/sales/summary/${year}`}>
           View annual summary
         </Link>
       </div>
