@@ -79,18 +79,60 @@
   color: var(--muted);
 }
 
-.cta,
-.ctaMuted {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--accent-strong);
+.cardActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.cta::after {
-  content: "→";
-  font-size: 1.1rem;
+.cardPrimaryButton,
+.cardButton,
+.cardButtonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+}
+
+.cardPrimaryButton {
+  color: white;
+  background: linear-gradient(120deg, #cc8d54, var(--accent));
+  box-shadow: 0 10px 22px rgba(163, 91, 42, 0.25);
+}
+
+.cardSecondaryActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cardButton {
+  color: var(--accent-strong);
+  background: rgba(163, 91, 42, 0.08);
+  border-color: rgba(163, 91, 42, 0.35);
+}
+
+.cardButtonSecondary {
+  color: var(--accent-strong);
+  background: rgba(163, 91, 42, 0.08);
+  border-color: rgba(163, 91, 42, 0.35);
+}
+
+.cardPrimaryButton:hover {
+  background: linear-gradient(120deg, #bf7d46, var(--accent-strong));
+}
+
+.cardButton:hover {
+  background: rgba(163, 91, 42, 0.16);
+}
+
+.cardButtonSecondary:hover {
+  background: rgba(163, 91, 42, 0.16);
 }
 
 .card:hover {
@@ -103,10 +145,6 @@
   background: rgba(255, 250, 242, 0.6);
   color: var(--muted);
   box-shadow: none;
-}
-
-.ctaMuted {
-  color: var(--muted);
 }
 
 @media (max-width: 640px) {
@@ -127,5 +165,9 @@
 
   .card {
     min-height: unset;
+  }
+
+  .cardSecondaryActions {
+    grid-template-columns: 1fr;
   }
 }

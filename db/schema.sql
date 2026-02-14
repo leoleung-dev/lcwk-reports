@@ -67,6 +67,33 @@ CREATE TABLE IF NOT EXISTS cerement_reports (
 CREATE INDEX IF NOT EXISTS idx_cerement_reports_month
   ON cerement_reports (entry_month);
 
+CREATE TABLE IF NOT EXISTS hkfh_sales_entries (
+  id BIGSERIAL PRIMARY KEY,
+  entry_year CHAR(4) NOT NULL,
+  staff_name TEXT NOT NULL,
+  display_order INTEGER NOT NULL DEFAULT 0,
+  amount_01 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_02 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_03 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_04 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_05 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_06 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_07 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_08 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_09 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_10 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_11 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  amount_12 NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  created_by TEXT NOT NULL DEFAULT 'unknown',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_by TEXT,
+  updated_at TIMESTAMPTZ,
+  UNIQUE (entry_year, staff_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_hkfh_sales_entries_year
+  ON hkfh_sales_entries (entry_year);
+
 CREATE TABLE IF NOT EXISTS allowed_emails (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,

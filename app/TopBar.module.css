@@ -1,34 +1,287 @@
-.bar {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  box-shadow: 0 12px 24px var(--shadow);
+.shell {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  padding: 12px 16px 0;
 }
 
-.signOut {
-  background: var(--accent-strong);
-  color: white;
-  padding: 8px 14px;
+.bar {
+  width: min(1400px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(122, 63, 30, 0.24);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.96), rgba(247, 237, 221, 0.9)),
+    radial-gradient(circle at top right, rgba(163, 91, 42, 0.08), transparent 55%);
+  box-shadow:
+    0 14px 30px rgba(60, 43, 25, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 7px 11px;
   border-radius: 999px;
+  border: 1px solid rgba(163, 91, 42, 0.3);
+  background: linear-gradient(120deg, rgba(204, 141, 84, 0.2), rgba(163, 91, 42, 0.1));
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.brand:hover {
+  transform: translateY(-1px);
+  border-color: rgba(163, 91, 42, 0.5);
+  background: linear-gradient(120deg, rgba(204, 141, 84, 0.3), rgba(163, 91, 42, 0.16));
+}
+
+.brandMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #cc8d54, var(--accent));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.brandText {
+  color: var(--accent-strong);
+  font-family: "Spectral", "Times New Roman", serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.brandActive {
+  border-color: rgba(163, 91, 42, 0.55);
+}
+
+.nav {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.menuSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  white-space: nowrap;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(163, 91, 42, 0.16);
+  background: rgba(255, 250, 242, 0.72);
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.menuSummary::-webkit-details-marker {
+  display: none;
+}
+
+.menuSummary:hover {
+  border-color: rgba(163, 91, 42, 0.38);
+  background: rgba(255, 246, 233, 0.95);
+  color: var(--accent-strong);
+}
+
+.menuSummaryActive {
+  border-color: rgba(163, 91, 42, 0.5);
+  background: rgba(163, 91, 42, 0.16);
+  color: var(--accent-strong);
   font-weight: 600;
 }
 
-@media (max-width: 600px) {
+.menu[open] .menuSummary {
+  border-color: rgba(163, 91, 42, 0.5);
+  background: rgba(255, 244, 228, 0.95);
+}
+
+.caret {
+  color: var(--muted);
+  font-size: 0.65rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.menu[open] .caret {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.menuList {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  min-width: 250px;
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(163, 91, 42, 0.26);
+  background:
+    linear-gradient(145deg, rgba(255, 251, 245, 0.98), rgba(248, 239, 226, 0.98)),
+    radial-gradient(circle at top, rgba(204, 141, 84, 0.1), transparent 60%);
+  box-shadow: 0 20px 36px rgba(42, 34, 24, 0.2);
+  animation: drop-in 0.15s ease-out;
+}
+
+.menuRight .menuList {
+  left: auto;
+  right: 0;
+}
+
+.menuLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 9px;
+  padding: 8px 10px;
+  color: var(--ink);
+  font-size: 0.88rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menuLink:hover {
+  background: rgba(163, 91, 42, 0.13);
+  color: var(--accent-strong);
+}
+
+.menuLinkActive {
+  background: linear-gradient(120deg, rgba(204, 141, 84, 0.24), rgba(163, 91, 42, 0.13));
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.signOut {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  color: #fff;
+  font-weight: 600;
+  white-space: nowrap;
+  background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 10px 20px rgba(122, 63, 30, 0.25);
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.signOut:hover {
+  filter: brightness(0.94);
+  transform: translateY(-1px);
+}
+
+.brand:focus-visible,
+.menuSummary:focus-visible,
+.menuLink:focus-visible,
+.signOut:focus-visible {
+  outline: 2px solid rgba(163, 91, 42, 0.52);
+  outline-offset: 2px;
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1120px) {
+  .shell {
+    padding: 10px 12px 0;
+  }
+
   .bar {
-    top: 12px;
-    right: 12px;
-    padding: 6px;
+    gap: 8px;
+  }
+
+  .menuSummary {
+    padding: 7px 10px;
+    font-size: 0.85rem;
   }
 
   .signOut {
     padding: 7px 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .bar {
+    flex-wrap: wrap;
+  }
+
+  .brand {
+    order: 1;
+  }
+
+  .signOut {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .nav {
+    order: 3;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 8px 8px 0;
+  }
+
+  .bar {
+    border-radius: 14px;
+    padding: 7px;
+  }
+
+  .brand {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+
+  .brandMark {
+    min-width: 40px;
+    font-size: 0.66rem;
+  }
+
+  .brandText {
+    font-size: 0.92rem;
+  }
+
+  .menuList,
+  .menuRight .menuList {
+    left: 0;
+    right: auto;
+    min-width: 220px;
   }
 }

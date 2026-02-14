@@ -5,10 +5,11 @@ monthly entry, reference generation, and Excel export.
 
 ## Overview
 
-LCWK Reports is a Next.js app that hosts three annual report workflows:
+LCWK Reports is a Next.js app that hosts four annual report workflows:
 - Sales (`/sales/{year}`): monthly entries, reference generation, and exports.
 - Commission (`/commission/{year}`): handler-based commission tracking with exports.
 - Cerement (`/cerement/{year}`): month-end totals for each location.
+- HK Branch Sales (`/hkfh-sales/{year}`): staff-based monthly matrix for Hong Kong branch sales.
 
 Summary pages provide annual charts, tables, and year-level exports. Admin pages
 let staff manage the services and handlers catalogs.
@@ -64,8 +65,13 @@ Open http://localhost:3000
 - `/sales/{year}` - Annual sales report entry + monthly view with month tabs.
 - `/commission/{year}` - Master commission report entry with monthly view.
 - `/cerement/{year}` - Cerement month-end totals by location.
+- `/hkfh-sales/{year}` - Hong Kong branch annual sales table by staff.
+- `/hkfh-sales/summary/{year}` - Hong Kong branch annual summary by agent and month.
+- `/hkfh-sales/summary/overall` - Hong Kong branch cross-year summary.
 - `/admin/services` - Add new services for staff to select.
 - `/admin/handlers` - Add handlers for staff to select.
 - `/admin` - Admin hub with access list management.
 - `/api/sales/export` - Excel export endpoint (used by the UI)
 - `/api/cerement` - Cerement month-end totals API.
+- `/api/hkfh-sales` - Hong Kong branch yearly matrix API.
+- `/api/hkfh-sales/years` - Hong Kong branch years list API.

@@ -97,6 +97,37 @@ function getMetricKey(metric) {
   return metric === "commission" ? "total_commission" : "total";
 }
 
+function parseYearsQueryParam(value) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return [];
+  }
+  const seen = new Set();
+  return raw
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => /^\d{4}$/.test(item))
+    .filter((item) => {
+      if (seen.has(item)) {
+        return false;
+      }
+      seen.add(item);
+      return true;
+    });
+}
+
+function arraysEqual(a, b) {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let index = 0; index < a.length; index += 1) {
+    if (a[index] !== b[index]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function buildMonthTotals(summary, metricKey) {
   const totalsByMonth = {};
   (summary?.months || []).forEach((month) => {
@@ -243,18 +274,67 @@ export default function CommissionSummaryOverallClient() {
     };
   }, [years]);
 
+  const orderedYears = useMemo(() => {
+    return [...years].sort((a, b) => b.localeCompare(a));
+  }, [years]);
+
+  const selectedYearsOrdered = useMemo(() => {
+    return [...selectedYears]
+      .filter((year) => years.includes(year))
+      .sort((a, b) => a.localeCompare(b));
+  }, [selectedYears, years]);
+
+  useEffect(() => {
+    if (orderedYears.length === 0) {
+      setSelectedYears([]);
+      return;
+    }
+
+    setSelectedYears((prev) => {
+      const fromQuery =
+        typeof window === "undefined"
+          ? []
+          : parseYearsQueryParam(
+              new URLSearchParams(window.location.search).get("year")
+            ).filter((year) => orderedYears.includes(year));
+
+      if (fromQuery.length > 0) {
+        return arraysEqual(prev, fromQuery) ? prev : fromQuery;
+      }
+
+      const valid = prev.filter((year) => orderedYears.includes(year));
+      if (valid.length > 0) {
+        return valid;
+      }
+
+      return orderedYears.slice(0, 2);
+    });
+  }, [orderedYears]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || orderedYears.length === 0) {
+      return;
+    }
+
+    const normalized = selectedYears.filter((year) => orderedYears.includes(year));
+    const url = new URL(window.location.href);
+    if (normalized.length > 0) {
+      url.searchParams.set("year", normalized.join(","));
+    } else {
+      url.searchParams.delete("year");
+    }
+
+    const nextUrl = `${url.pathname}${url.search}${url.hash}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(null, "", nextUrl);
+    }
+  }, [selectedYears, orderedYears]);
+
   useEffect(() => {
     if (years.length === 0) {
       return;
     }
-    const sorted = [...years].sort((a, b) => b.localeCompare(a));
-    setSelectedYears((prev) => {
-      const valid = prev.filter((year) => sorted.includes(year));
-      if (valid.length > 0) {
-        return valid;
-      }
-      return sorted.slice(0, 2);
-    });
     setMetricByYear((prev) => {
       const next = { ...prev };
       years.forEach((year) => {
@@ -265,16 +345,6 @@ export default function CommissionSummaryOverallClient() {
       return next;
     });
   }, [years]);
-
-  const orderedYears = useMemo(() => {
-    return [...years].sort((a, b) => b.localeCompare(a));
-  }, [years]);
-
-  const selectedYearsOrdered = useMemo(() => {
-    return [...selectedYears]
-      .filter((year) => years.includes(year))
-      .sort((a, b) => a.localeCompare(b));
-  }, [selectedYears, years]);
 
   function toggleYear(year) {
     setSelectedYears((prev) => {

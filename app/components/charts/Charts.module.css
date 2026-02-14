@@ -123,9 +123,61 @@
   border-radius: 16px;
 }
 
+.lineChartWrap {
+  position: relative;
+}
+
+.lineHoverTarget {
+  fill: transparent;
+  pointer-events: all;
+  cursor: crosshair;
+}
+
+.lineHoverPath {
+  stroke: transparent;
+  stroke-width: 18;
+  pointer-events: stroke;
+  cursor: crosshair;
+}
+
+.lineTooltip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: var(--accent-strong);
+  color: white;
+  border-radius: 999px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow: 0 8px 16px rgba(42, 34, 24, 0.25);
+  pointer-events: none;
+  z-index: 4;
+  min-width: 120px;
+  text-align: center;
+}
+
+.lineTooltip strong {
+  font-size: 0.72rem;
+  color: white;
+  font-weight: 600;
+}
+
+.lineTooltip span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+}
+
 .chartGrid {
   stroke: rgba(122, 63, 30, 0.15);
   stroke-width: 1;
+}
+
+.chartAxisLabel {
+  font-size: 9px;
+  fill: var(--muted);
+  font-weight: 600;
 }
 
 .chartLine {
