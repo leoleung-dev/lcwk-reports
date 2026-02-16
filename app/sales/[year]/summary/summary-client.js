@@ -100,7 +100,26 @@ export default function SummaryClient({ year: yearProp }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
-  const selectedLabel = selectedMonth === "all" ? "All Year" : selectedMonth;
+  const selectedMonthNumber = useMemo(() => {
+    if (selectedMonth === "all") {
+      return null;
+    }
+    const monthPart = String(selectedMonth).split("-")[1];
+    const parsed = Number(monthPart);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 12) {
+      return null;
+    }
+    return parsed;
+  }, [selectedMonth]);
+
+  const titlePrefix = `梁津煥記(禮儀顧問) 營業額 ${year}年`;
+  const monthlySalesTitle = `${titlePrefix} 每月銷售額`;
+  const serviceSalesTitle = selectedMonthNumber
+    ? `${titlePrefix}${selectedMonthNumber}月 服務銷售額`
+    : `${titlePrefix} 服務銷售額`;
+  const salesEntriesTitle = selectedMonthNumber
+    ? `${titlePrefix}${selectedMonthNumber}月 銷售明細`
+    : `${titlePrefix} 銷售明細`;
 
   const maxTotal = useMemo(() => {
     return months.reduce((max, item) => Math.max(max, item.total || 0), 0);
@@ -228,7 +247,7 @@ export default function SummaryClient({ year: yearProp }) {
           <Link className={styles.backLink} href={`/sales/${year}`}>
             ← Back to sales
           </Link>
-          <h1>Annual Summary {year}</h1>
+          <h1>{`${titlePrefix} 年度總結`}</h1>
           <p>Monthly totals, service breakdown, and detailed entries.</p>
         </div>
         <div className={styles.headerActions}>
@@ -280,7 +299,7 @@ export default function SummaryClient({ year: yearProp }) {
       <section className={styles.chartSection}>
         <div className={styles.barCard}>
           <div className={styles.barHeader}>
-            <h2>Monthly totals</h2>
+            <h2>{monthlySalesTitle}</h2>
             <span>Click a month to view details</span>
           </div>
           <BarChart
@@ -308,7 +327,7 @@ export default function SummaryClient({ year: yearProp }) {
 
         <div className={styles.pieCard}>
           <div className={styles.barHeader}>
-            <h2>Service mix ({selectedLabel})</h2>
+            <h2>{serviceSalesTitle}</h2>
             <span>{formatMoney(pieTotal)}</span>
           </div>
           <PieChart
@@ -326,7 +345,7 @@ export default function SummaryClient({ year: yearProp }) {
 
       <section className={styles.tableSection}>
         <div className={styles.tableHeader}>
-          <h2>Entries for {selectedLabel}</h2>
+          <h2>{salesEntriesTitle}</h2>
           <div className={styles.tableMeta}>
             <span>{entries.length} entries</span>
             <button

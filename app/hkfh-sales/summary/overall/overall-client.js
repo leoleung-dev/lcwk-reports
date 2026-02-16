@@ -335,6 +335,7 @@ function HkfhSalesOverallContent() {
     () => yearlyRows.reduce((sum, row) => sum + row.total, 0),
     [yearlyRows]
   );
+  const overallTitlePrefix = "香港分店 營業額";
 
   return (
     <main className={styles.page}>
@@ -343,7 +344,7 @@ function HkfhSalesOverallContent() {
           <Link className={styles.backLink} href="/hkfh-sales">
             ← Back to monthly entry
           </Link>
-          <h1>香港分店營業額 · Overall Summary</h1>
+          <h1>{`${overallTitlePrefix} 跨年總結`}</h1>
           <p>Compare yearly totals and monthly trends across available years.</p>
         </div>
       </header>
@@ -370,12 +371,12 @@ function HkfhSalesOverallContent() {
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2>Year totals</h2>
+              <h2>{`${overallTitlePrefix} 每年總額`}</h2>
             </div>
             <div className={styles.chartGrid}>
               <article className={styles.chartCard}>
                 <div className={styles.chartHeader}>
-                  <h3>Total bar by year</h3>
+                  <h3>每年總額</h3>
                   <span>{formatMoney(overallGrandTotal)}</span>
                 </div>
                 <BarChart
@@ -391,7 +392,7 @@ function HkfhSalesOverallContent() {
 
               <article className={styles.chartCard}>
                 <div className={styles.chartHeader}>
-                  <h3>Total trend by year</h3>
+                  <h3>每年總額趨勢</h3>
                   <span>
                     {yearlyTotalsMax > 0
                       ? `Peak ${formatMoney(yearlyTotalsMax)}`
@@ -417,7 +418,7 @@ function HkfhSalesOverallContent() {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2>Monthly versus by year</h2>
+                <h2>{`${overallTitlePrefix} 跨年對比`}</h2>
                 <p>Select years to compare monthly trends.</p>
               </div>
               <div className={styles.yearChecklist}>
@@ -435,7 +436,7 @@ function HkfhSalesOverallContent() {
             </div>
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Monthly trendline versus</h3>
+                <h3>每月營業額對比</h3>
                 <span>
                   {versusMax > 0
                     ? `Peak ${formatMoney(versusMax)}`
@@ -470,11 +471,11 @@ function HkfhSalesOverallContent() {
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2>All-years pie by 經手人</h2>
+              <h2>{`${overallTitlePrefix} 經手者總額`}</h2>
             </div>
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>All-years total pie</h3>
+                <h3>跨年經手者營業額</h3>
                 <span>{formatMoney(overallGrandTotal)}</span>
               </div>
               <PieChart
@@ -489,7 +490,7 @@ function HkfhSalesOverallContent() {
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2>Year summary table</h2>
+              <h2>{`${overallTitlePrefix} 每年概覽`}</h2>
             </div>
             <div className={styles.tableWrap}>
               <table className={styles.table}>

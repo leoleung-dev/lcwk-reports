@@ -96,16 +96,41 @@ export default function SummaryClient({ year: yearProp }) {
   const [pieMonth, setPieMonth] = useState("all");
   const [metric, setMetric] = useState("sales");
 
-  const selectedMonthLabel = useMemo(() => {
-    if (pieMonth === "all") {
-      return "All year";
-    }
-    return pieMonth;
-  }, [pieMonth]);
-
   const activeMonth = pieMonth === "all" ? null : pieMonth;
   const metricKey = metric === "commission" ? "total_commission" : "total";
   const metricLabel = metric === "commission" ? "Commission" : "Sales";
+  const isSalesMetric = metric === "sales";
+  const titlePrefix = `梁津煥記(禮儀顧問) ${year}年`;
+
+  const selectedMonthNumber = useMemo(() => {
+    if (pieMonth === "all") {
+      return null;
+    }
+    const monthPart = String(pieMonth).split("-")[1];
+    const parsed = Number(monthPart);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 12) {
+      return null;
+    }
+    return parsed;
+  }, [pieMonth]);
+
+  const monthlySummaryTitle = isSalesMetric
+    ? `${titlePrefix} 每月銷售額`
+    : `${titlePrefix} 每月佣金`;
+  const agentSummaryTitle = isSalesMetric
+    ? `${titlePrefix} 經手者銷售額`
+    : `${titlePrefix} 經手者佣金`;
+  const perAgentMonthlyOverviewTitle = isSalesMetric
+    ? `${titlePrefix} 銷售額概覽`
+    : `${titlePrefix} 佣金概覽`;
+  const caseMonthlyOverviewTitle = `${titlePrefix} 每月案件數概覽`;
+  const agentMixTitle = isSalesMetric
+    ? selectedMonthNumber
+      ? `${titlePrefix}${selectedMonthNumber}月 經手者銷售額`
+      : agentSummaryTitle
+    : selectedMonthNumber
+      ? `${titlePrefix}${selectedMonthNumber}月 經手者佣金`
+      : agentSummaryTitle;
 
   const handlers = useMemo(() => {
     const list = Array.from(new Set(rows.map((row) => row.handler)));
@@ -235,15 +260,15 @@ export default function SummaryClient({ year: yearProp }) {
       <header className={styles.header}>
         <div>
           <Link className={styles.backLink} href={`/commission/${year}`}>
-            ← Back to commission
+            ← 返回佣金登記
           </Link>
-          <h1>{year} Commission Summary</h1>
-          <p>Commission totals and case counts across all handlers.</p>
+          <h1>{`梁津煥記(禮儀顧問) 佣金登記 ${year}年 年度總結`}</h1>
+          <p>查看年度銷售與佣金分佈，以及每月案件數。</p>
         </div>
         <div className={styles.headerActions}>
           <div className={styles.headerActionsTop}>
             <Link className={styles.overallLink} href="/commission/summary/overall">
-              Overall
+              跨年總結
             </Link>
             <div className={styles.yearNav}>
               <Link
@@ -266,7 +291,7 @@ export default function SummaryClient({ year: yearProp }) {
             className={styles.exportButton}
             onClick={handleExportYear}
           >
-            Export year
+            匯出年度
           </button>
         </div>
       </header>
@@ -318,7 +343,7 @@ export default function SummaryClient({ year: yearProp }) {
       <section className={styles.chartsSection}>
         <div className={styles.barCard}>
           <div className={styles.barHeader}>
-            <h2>{year} {metricLabel} Summary by Month</h2>
+            <h2>{monthlySummaryTitle}</h2>
             <span>Click a month to focus tables</span>
           </div>
           <BarChart
@@ -346,9 +371,7 @@ export default function SummaryClient({ year: yearProp }) {
 
         <div className={styles.pieCard}>
           <div className={styles.pieHeader}>
-            <h3>
-              Agent Mix ({metricLabel} · {selectedMonthLabel})
-            </h3>
+            <h3>{agentMixTitle}</h3>
           </div>
           <PieChart
             data={pieData.map((item) => ({
@@ -366,7 +389,7 @@ export default function SummaryClient({ year: yearProp }) {
       <section className={styles.tableSummarySection}>
         <div className={styles.tableStack}>
           <div className={styles.tableCard}>
-            <h2>{year} {metricLabel} (By Month, Per Agent)</h2>
+            <h2>{perAgentMonthlyOverviewTitle}</h2>
             <div className={styles.tableWrap}>
               <table>
                 <thead>
@@ -447,7 +470,7 @@ export default function SummaryClient({ year: yearProp }) {
           </div>
 
           <div className={styles.tableCard}>
-            <h2>{year} Case Number (By Month, Per Agent)</h2>
+            <h2>{caseMonthlyOverviewTitle}</h2>
             <div className={styles.tableWrap}>
               <table>
                 <thead>
@@ -529,7 +552,7 @@ export default function SummaryClient({ year: yearProp }) {
 
         <div className={styles.summaryGrid}>
           <div className={styles.summaryCard}>
-            <h3>{year} {metricLabel} Summary (Month)</h3>
+            <h3>{monthlySummaryTitle}</h3>
             <table>
               <tbody>
                 {months.map((month, index) => (
@@ -554,7 +577,7 @@ export default function SummaryClient({ year: yearProp }) {
           </div>
 
           <div className={styles.summaryCard}>
-            <h3>{year} {metricLabel} Summary (Agent)</h3>
+            <h3>{agentSummaryTitle}</h3>
             <table>
               <tbody>
                 {handlers.map((handler) => (

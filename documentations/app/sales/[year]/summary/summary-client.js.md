@@ -35,6 +35,8 @@ Client-side annual sales summary view. It renders monthly bar charts, a service-
     - Loads entries via `/api/sales?month=YYYY-MM` or `/api/sales?year=YYYY` depending on the selected month.
     - Builds bar chart heights and pie breakdown from loaded data.
     - Allows month selection via tabs and chart clicks; “All Year” clears focus.
+    - Uses `梁津煥記(禮儀顧問) 營業額 {year}年 ...` headings across chart/table sections.
+    - For month-specific views, service mix and entries headings switch to `梁津煥記(禮儀顧問) 營業額 {year}年{month}月 ...`.
   - Usage: Rendered by `app/sales/summary/[year]/page.js` (legacy route redirects).
 
 - `handleExportSelection()`

@@ -311,6 +311,12 @@
   gap: 16px;
 }
 
+.pieStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .chartHeader,
 .pieHeader {
   display: flex;

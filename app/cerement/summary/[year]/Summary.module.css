@@ -603,6 +603,12 @@
   gap: 16px;
 }
 
+.pieStack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .pieHeader {
   display: flex;
   justify-content: space-between;

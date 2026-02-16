@@ -39,7 +39,7 @@ const reportMenus = [
   },
   {
     key: "hkfh-sales",
-    label: "香港分店營業額 · HK Branch",
+    label: "香港分店營業額 · HKFH Sales",
     prefixes: ["/hkfh-sales"],
     links: (year) => [
       { label: "Open report", href: "/hkfh-sales" },

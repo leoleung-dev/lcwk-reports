@@ -423,6 +423,8 @@ export default function CommissionSummaryOverallClient() {
   }, [summariesByYear, versusMetric, selectedYearsOrdered]);
 
   const metricLabel = versusMetric === "commission" ? "Commission" : "Sales";
+  const versusMetricLabel =
+    versusMetric === "commission" ? "佣金" : "銷售額";
   const hasVersusRows = versusData.rows.length > 0;
   const hasSpotlight = Boolean(versusData.spotlight);
   const combinedVersusRows = hasSpotlight
@@ -436,7 +438,7 @@ export default function CommissionSummaryOverallClient() {
           <Link className={styles.backLink} href="/commission">
             ← Back to commission
           </Link>
-          <h1>Commission Overall Summary</h1>
+          <h1>梁津煥記(禮儀顧問) 佣金登記 跨年總結</h1>
           <p>Compare agent performance across years and review annual trends.</p>
         </div>
       </header>
@@ -450,7 +452,7 @@ export default function CommissionSummaryOverallClient() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <h2>Versus</h2>
+            <h2>梁津煥記(禮儀顧問) 佣金登記 跨年對比</h2>
             <p>Compare agent totals across selected years.</p>
           </div>
           <div className={styles.sectionControls}>
@@ -498,7 +500,9 @@ export default function CommissionSummaryOverallClient() {
           ) : (
             <>
               <div className={styles.chartTitle}>
-                <span className={styles.chartTitleMetric}>{metricLabel}:</span>
+                <span className={styles.chartTitleMetric}>
+                  {`梁津煥記(禮儀顧問) 佣金登記 ${versusMetricLabel}`}
+                </span>
                 <span className={styles.chartTitleYears}>
                   {versusData.selectedYears.map((year, index) => (
                     <span key={`title-${year}`}>
@@ -570,7 +574,7 @@ export default function CommissionSummaryOverallClient() {
       <section className={styles.section}>
         <div className={styles.sectionHeader}>
           <div>
-            <h2>Yearly overview</h2>
+            <h2>梁津煥記(禮儀顧問) 佣金登記 每年概覽</h2>
             <p>Monthly trends plus agent totals and share for each year.</p>
           </div>
         </div>
@@ -606,6 +610,8 @@ export default function CommissionSummaryOverallClient() {
             );
             const yearMetricLabel =
               yearMetric === "commission" ? "Commission" : "Sales";
+            const yearMetricLabelCn =
+              yearMetric === "commission" ? "佣金" : "銷售額";
 
             return (
               <article key={year} className={styles.yearCard}>
@@ -654,7 +660,7 @@ export default function CommissionSummaryOverallClient() {
                   <div className={styles.overviewLeft}>
                     <div className={styles.chartCard}>
                       <div className={styles.chartHeader}>
-                        <h4>{yearMetricLabel} monthly trend</h4>
+                        <h4>{`${year}年 每月${yearMetricLabelCn}`}</h4>
                         <span>
                           {lineMax > 0
                             ? `Peak ${formatMoney(lineMax)}`
@@ -679,7 +685,7 @@ export default function CommissionSummaryOverallClient() {
 
                     <div className={styles.chartCard}>
                       <div className={styles.chartHeader}>
-                        <h4>{yearMetricLabel} by agent</h4>
+                        <h4>{`${year}年 經手者${yearMetricLabelCn}`}</h4>
                         <span>{combinedBarRows.length} agents</span>
                       </div>
                       {barRows.length === 0 ? (
@@ -720,7 +726,7 @@ export default function CommissionSummaryOverallClient() {
 
                   <div className={styles.pieCard}>
                     <div className={styles.chartHeader}>
-                      <h4>{yearMetricLabel} share</h4>
+                      <h4>{`${year}年 經手者${yearMetricLabelCn}`}</h4>
                       <span>
                         {pieData.total > 0
                           ? formatMoney(pieData.total)

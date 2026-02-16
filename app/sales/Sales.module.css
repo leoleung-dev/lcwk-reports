@@ -82,7 +82,7 @@
 }
 
 .yearLabel {
-  font-family: "Spectral", "Times New Roman", serif;
+  font-family: "Noto Serif TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", serif;
   font-size: 1.15rem;
   color: var(--accent-strong);
 }

@@ -12,6 +12,8 @@ Client-side cross-year summary for Hong Kong branch sales.
   - Monthly totals per year
   - Agent totals per year and across all years
 - Renders:
+  - Page title `香港分店 營業額 跨年總結`.
+  - Renamed sections/charts for yearly totals, cross-year monthly comparison, all-years `經手人` totals, and yearly summary table.
   - Year total bar and trend charts (with chart titles; ordered oldest year on the left to newest on the right).
   - Monthly versus trendline for selected years (with chart title).
   - All-years pie by `經手人` (with chart title).

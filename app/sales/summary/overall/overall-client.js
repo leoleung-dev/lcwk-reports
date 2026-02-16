@@ -305,6 +305,7 @@ export default function SalesSummaryOverallClient() {
 
   const hasVersusRows = versusData.groups.length > 0;
   const hasYearData = orderedYears.length > 0;
+  const overallTitlePrefix = "梁津煥記(禮儀顧問) 營業額";
 
   return (
     <main className={styles.page}>
@@ -313,7 +314,7 @@ export default function SalesSummaryOverallClient() {
           <Link className={styles.backLink} href="/sales">
             ← Back to sales
           </Link>
-          <h1>Sales Overall Summary</h1>
+          <h1>{`${overallTitlePrefix} 跨年總結`}</h1>
           <p>Compare yearly sales performance and review monthly trends.</p>
         </div>
       </header>
@@ -329,7 +330,7 @@ export default function SalesSummaryOverallClient() {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2>Versus</h2>
+                <h2>{`${overallTitlePrefix} 跨年對比`}</h2>
                 <p>Compare monthly sales totals across selected years.</p>
               </div>
               <div className={styles.sectionControls}>
@@ -359,7 +360,9 @@ export default function SalesSummaryOverallClient() {
               ) : (
                 <>
                   <div className={styles.chartTitle}>
-                    <span className={styles.chartTitleMetric}>Sales:</span>
+                    <span className={styles.chartTitleMetric}>
+                      {`${overallTitlePrefix} 銷售額`}
+                    </span>
                     <span className={styles.chartTitleYears}>
                       {versusData.selectedYears.map((year, index) => (
                         <span key={`title-${year}`}>
@@ -412,7 +415,7 @@ export default function SalesSummaryOverallClient() {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2>Yearly overview</h2>
+                <h2>{`${overallTitlePrefix} 每年概覽`}</h2>
                 <p>Monthly trends plus totals and share for each year.</p>
               </div>
             </div>
@@ -465,7 +468,7 @@ export default function SalesSummaryOverallClient() {
                       <div className={styles.overviewLeft}>
                         <div className={styles.chartCard}>
                           <div className={styles.chartHeader}>
-                            <h4>Sales monthly trend</h4>
+                            <h4>{`${year}年 銷售額 趨勢`}</h4>
                             <span>
                               {lineMax > 0
                                 ? `Peak ${formatMoney(lineMax)}`
@@ -490,7 +493,7 @@ export default function SalesSummaryOverallClient() {
 
                         <div className={styles.chartCard}>
                           <div className={styles.chartHeader}>
-                            <h4>Sales by month</h4>
+                            <h4>{`${year}年 每月 銷售額`}</h4>
                             <span>{monthLabels.length} months</span>
                           </div>
                           <BarChart
@@ -507,7 +510,7 @@ export default function SalesSummaryOverallClient() {
 
                       <div className={styles.pieCard}>
                         <div className={styles.chartHeader}>
-                          <h4>Sales share</h4>
+                          <h4>{`${year}年 每月 銷售額`}</h4>
                           <span>
                             {yearTotal > 0
                               ? formatMoney(yearTotal)

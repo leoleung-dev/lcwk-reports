@@ -96,6 +96,7 @@ function getRowTotal(values) {
 export default function HkfhSalesSummaryClient({ year: yearProp }) {
   const nowYear = new Date().getFullYear();
   const year = isValidYear(yearProp) ? String(yearProp) : String(nowYear);
+  const titlePrefix = `香港分店 營業額 ${year}年`;
 
   const [entries, setEntries] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState("");
@@ -211,7 +212,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
           <Link className={styles.backLink} href={`/hkfh-sales/${year}`}>
             ← Back to monthly entry
           </Link>
-          <h1>香港分店營業額 · Annual Summary</h1>
+          <h1>{`${titlePrefix} 年度總結`}</h1>
           <p>
             Summary table, 經手人 share, and monthly trend/bar views for {year}.
           </p>
@@ -256,7 +257,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
 
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2>Summary table</h2>
+              <h2>{`${year}年 香港分店營業額概覽`}</h2>
             </div>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -300,7 +301,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
           <section className={styles.chartSection}>
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Total pie by 經手人</h3>
+                <h3>{`${titlePrefix} 經手者營業額`}</h3>
                 <span>{formatMoney(yearlyTotal)}</span>
               </div>
               <PieChart
@@ -316,7 +317,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
           <section className={styles.chartGrid}>
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Total trend</h3>
+                <h3>{`${year}年 每月營業額 趨勢`}</h3>
                 <span>{totalMax > 0 ? `Peak ${formatMoney(totalMax)}` : "No totals"}</span>
               </div>
               <LineChart
@@ -337,7 +338,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
 
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Total bar</h3>
+                <h3>{`${year}年 每月營業額`}</h3>
                 <span>{formatMoney(yearlyTotal)}</span>
               </div>
               <BarChart
@@ -355,7 +356,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
           <section className={styles.chartGrid}>
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Trendline per agent</h3>
+                <h3>{`${year}年 經手者每月營業額趨勢`}</h3>
                 <select
                   className={styles.agentSelect}
                   value={selectedAgent}
@@ -391,7 +392,7 @@ export default function HkfhSalesSummaryClient({ year: yearProp }) {
 
             <article className={styles.chartCard}>
               <div className={styles.chartHeader}>
-                <h3>Bar per agent</h3>
+                <h3>{`${year}年 經手者每月營業額`}</h3>
                 <span>
                   {selectedAgentRow
                     ? `${selectedAgent} · ${formatMoney(selectedAgentRow.total)}`

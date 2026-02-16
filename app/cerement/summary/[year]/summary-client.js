@@ -175,12 +175,15 @@ export default function CerementSummaryClient({ year: yearProp }) {
   }, [compareMetric]);
 
   const compareTitle = useMemo(() => {
+    if (compareMetric === "total") {
+      return `梁津煥記${year}年壽衣紀錄總計`;
+    }
     const compareSorted = [...compareYears].sort(
       (a, b) => Number(b) - Number(a)
     );
     const titleYears = [year, ...compareSorted.filter((value) => value !== year)];
-    return `${compareMetricLabel}: ${titleYears.join(" vs ")}`;
-  }, [compareMetricLabel, compareYears, year]);
+    return `${compareMetricLabel}：${titleYears.join(" vs ")}`;
+  }, [compareMetric, compareMetricLabel, compareYears, year]);
 
   useEffect(() => {
     async function loadSummary() {
@@ -317,6 +320,22 @@ export default function CerementSummaryClient({ year: yearProp }) {
     return pieData.reduce((sum, item) => sum + item.value, 0);
   }, [pieData]);
 
+  const annualStorePieData = useMemo(() => {
+    return amountColumns
+      .map((column) => ({
+        label: column.label,
+        value: monthRows.reduce(
+          (sum, row) => sum + Number(row[column.key] || 0),
+          0
+        ),
+      }))
+      .filter((item) => item.value > 0);
+  }, [monthRows]);
+
+  const annualStoreTotal = useMemo(() => {
+    return annualStorePieData.reduce((sum, item) => sum + item.value, 0);
+  }, [annualStorePieData]);
+
   const monthRowsByYear = useMemo(() => {
     const map = { [year]: monthRows };
     compareYears.forEach((compareYear) => {
@@ -418,7 +437,7 @@ export default function CerementSummaryClient({ year: yearProp }) {
           <Link className={styles.backLink} href={`/cerement/${year}`}>
             ← Back to monthly entry
           </Link>
-          <h1>壽衣紀錄 · Annual Summary</h1>
+          <h1>{`梁津煥記 壽衣紀錄 ${year}年 年度總結`}</h1>
           <p>Review yearly cerement totals across each location.</p>
         </div>
         <div className={styles.headerActions}>
@@ -522,7 +541,11 @@ export default function CerementSummaryClient({ year: yearProp }) {
                 <section className={styles.barCard}>
                   <div className={styles.barHeader}>
                     <div>
-                      <h3>{`Monthly bars · ${compareMetricLabel}`}</h3>
+                      <h3>
+                        {compareMetric === "total"
+                          ? `梁津煥記${year}年每月壽衣紀錄`
+                          : `${year}年每月${compareMetricLabel}`}
+                      </h3>
                       <p>
                         {compareMetric === "total"
                           ? "Store totals grouped by month."
@@ -562,23 +585,48 @@ export default function CerementSummaryClient({ year: yearProp }) {
             </div>
 
             {showPieChart ? (
-              <section className={styles.pieCard}>
-                <div className={styles.pieHeader}>
-                  <div>
-                    <h3>{`Monthly mix · ${compareMetricLabel}`}</h3>
-                    <p>Share of the selected metric across months.</p>
+              <section className={styles.pieStack}>
+                <div className={styles.pieCard}>
+                  <div className={styles.pieHeader}>
+                    <div>
+                      <h3>
+                        {compareMetric === "total"
+                          ? `梁津煥記${year}年每月壽衣紀錄`
+                          : `${year}年每月${compareMetricLabel}`}
+                      </h3>
+                      <p>Share of the selected metric across months.</p>
+                    </div>
+                    <span className={styles.chartNote}>
+                      {formatMoney(pieTotal)}
+                    </span>
                   </div>
-                  <span className={styles.chartNote}>
-                    {formatMoney(pieTotal)}
-                  </span>
+                  <PieChart
+                    data={pieData}
+                    palette={piePalette}
+                    formatValue={formatMoney}
+                    formatPercent={formatPercent}
+                    emptyLabel="No data to display."
+                  />
                 </div>
-                <PieChart
-                  data={pieData}
-                  palette={piePalette}
-                  formatValue={formatMoney}
-                  formatPercent={formatPercent}
-                  emptyLabel="No data to display."
-                />
+
+                <div className={styles.pieCard}>
+                  <div className={styles.pieHeader}>
+                    <div>
+                      <h3>{`梁津煥記${year}年分店壽衣紀錄`}</h3>
+                      <p>Share of annual totals across stores.</p>
+                    </div>
+                    <span className={styles.chartNote}>
+                      {formatMoney(annualStoreTotal)}
+                    </span>
+                  </div>
+                  <PieChart
+                    data={annualStorePieData}
+                    palette={piePalette}
+                    formatValue={formatMoney}
+                    formatPercent={formatPercent}
+                    emptyLabel="No store totals yet."
+                  />
+                </div>
               </section>
             ) : null}
           </div>
@@ -586,7 +634,7 @@ export default function CerementSummaryClient({ year: yearProp }) {
           <section className={styles.tableCard}>
             <div className={styles.tableHeader}>
               <div>
-                <h2>Monthly totals</h2>
+                <h2>{`梁津煥記${year}年分店壽衣紀錄概覽`}</h2>
                 <p>Totals per location with a full-year rollup.</p>
               </div>
               {loading ? <span className={styles.status}>Loading...</span> : null}
@@ -651,7 +699,7 @@ export default function CerementSummaryClient({ year: yearProp }) {
           >
             <div className={styles.modalHeader}>
               <div>
-                <h3>Chart options</h3>
+                <h3>圖表設定</h3>
                 <p>Select a metric and the years to compare.</p>
               </div>
               <button

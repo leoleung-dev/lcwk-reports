@@ -322,6 +322,7 @@ export default function OverallSummaryClient() {
       ? "Total"
       : amountColumns.find((column) => column.key === activeMetric)?.label ||
         "Total";
+  const isTotalMetric = activeMetric === "total";
 
   const versusData = useMemo(() => {
     if (selectedYearsOrdered.length === 0) {
@@ -380,10 +381,10 @@ export default function OverallSummaryClient() {
       <header className={styles.header}>
         <div>
           <Link className={styles.backLink} href="/cerement">
-            ← Cerement
+            ← 返回壽衣登記
           </Link>
-          <h1>Cerement Overall Summary</h1>
-          <p>Compare yearly cerement performance and review monthly trends.</p>
+          <h1>梁津煥記 壽衣紀錄 跨年總結</h1>
+          <p>比較各年度壽衣記錄並查看每月走勢。</p>
         </div>
       </header>
 
@@ -398,8 +399,8 @@ export default function OverallSummaryClient() {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2>Versus</h2>
-                <p>Compare monthly totals across selected years.</p>
+                <h2>壽衣紀錄 跨年對比</h2>
+                <p>比較已選年份的每月壽衣總額。</p>
               </div>
               <div className={styles.sectionControls}>
                 <div className={styles.control}>
@@ -443,7 +444,7 @@ export default function OverallSummaryClient() {
                 <>
                   <div className={styles.chartTitle}>
                     <span className={styles.chartTitleMetric}>
-                      {metricLabel}:
+                      {isTotalMetric ? "梁津煥記 壽衣紀錄" : `${metricLabel}:`}
                     </span>
                     <span className={styles.chartTitleYears}>
                       {versusData.selectedYears.map((year, index) => (
@@ -497,7 +498,7 @@ export default function OverallSummaryClient() {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <div>
-                <h2>Yearly overview</h2>
+                <h2>壽衣紀錄每年概覽</h2>
                 <p>{metricLabel} trends and monthly mix for each year.</p>
               </div>
             </div>
@@ -564,6 +565,19 @@ export default function OverallSummaryClient() {
                     value: lineValues[index] || 0,
                   }))
                   .filter((item) => item.value > 0);
+                const annualStorePieData = amountColumns
+                  .map((column) => ({
+                    label: column.label,
+                    value: section.rows.reduce(
+                      (sum, row) => sum + Number(row[column.key] || 0),
+                      0
+                    ),
+                  }))
+                  .filter((item) => item.value > 0);
+                const annualStoreTotal = annualStorePieData.reduce(
+                  (sum, item) => sum + item.value,
+                  0
+                );
 
                 return (
                   <article key={section.yearValue} className={styles.yearCard}>
@@ -580,7 +594,11 @@ export default function OverallSummaryClient() {
                       <div className={styles.overviewLeft}>
                         <div className={styles.chartCard}>
                           <div className={styles.chartHeader}>
-                            <h4>{metricLabel} monthly trend</h4>
+                            <h4>
+                              {isTotalMetric
+                                ? `${section.yearValue}年 壽衣紀錄 趨勢`
+                                : `${section.yearValue}年 ${metricLabel} 趨勢`}
+                            </h4>
                             <span>
                               {lineMax > 0
                                 ? `Peak ${formatMoney(lineMax)}`
@@ -606,7 +624,11 @@ export default function OverallSummaryClient() {
 
                         <div className={styles.chartCard}>
                           <div className={styles.chartHeader}>
-                            <h4>{metricLabel} by month</h4>
+                            <h4>
+                              {isTotalMetric
+                                ? `${section.yearValue}年 每月 壽衣紀錄`
+                                : `${section.yearValue}年 每月 ${metricLabel}`}
+                            </h4>
                             <span>{monthTabs.length} months</span>
                           </div>
                           {activeMetric === "total" ? (
@@ -637,22 +659,46 @@ export default function OverallSummaryClient() {
                         </div>
                       </div>
 
-                      <div className={styles.pieCard}>
-                        <div className={styles.chartHeader}>
-                          <h4>{metricLabel} share</h4>
-                          <span>
-                            {yearTotal > 0
-                              ? formatMoney(yearTotal)
-                              : "No data"}
-                          </span>
+                      <div className={styles.pieStack}>
+                        <div className={styles.pieCard}>
+                          <div className={styles.chartHeader}>
+                            <h4>
+                              {isTotalMetric
+                                ? `${section.yearValue}年 每月 壽衣紀錄`
+                                : `${section.yearValue}年 ${metricLabel} 佔比`}
+                            </h4>
+                            <span>
+                              {yearTotal > 0
+                                ? formatMoney(yearTotal)
+                                : "No data"}
+                            </span>
+                          </div>
+                          <PieChart
+                            data={pieData}
+                            palette={piePalette}
+                            formatValue={formatMoney}
+                            formatPercent={formatPercent}
+                            emptyLabel="No data to display."
+                          />
                         </div>
-                        <PieChart
-                          data={pieData}
-                          palette={piePalette}
-                          formatValue={formatMoney}
-                          formatPercent={formatPercent}
-                          emptyLabel="No data to display."
-                        />
+
+                        <div className={styles.pieCard}>
+                          <div className={styles.chartHeader}>
+                            <h4>{`${section.yearValue}年 壽衣分店紀錄`}</h4>
+                            <span>
+                              {annualStoreTotal > 0
+                                ? formatMoney(annualStoreTotal)
+                                : "No data"}
+                            </span>
+                          </div>
+                          <PieChart
+                            data={annualStorePieData}
+                            palette={piePalette}
+                            formatValue={formatMoney}
+                            formatPercent={formatPercent}
+                            emptyLabel="No store totals yet."
+                          />
+                        </div>
                       </div>
                     </div>
                   </article>

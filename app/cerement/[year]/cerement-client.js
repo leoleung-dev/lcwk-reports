@@ -520,12 +520,11 @@ export default function CerementClient({ year: yearProp }) {
       <header className={styles.header}>
         <div>
           <Link className={styles.backLink} href="/">
-            ← Back to reports
+            ← 返回報表
           </Link>
-          <h1>壽衣紀錄 · Cerement</h1>
+          <h1>梁津煥記 壽衣紀錄</h1>
           <p>
-            Reporting is done on the last day of each month. Record the total
-            sold across each location.
+            每月月底記錄各分店壽衣總額。
           </p>
         </div>
         <div className={styles.yearNav}>
@@ -542,7 +541,7 @@ export default function CerementClient({ year: yearProp }) {
       <div className={styles.yearLabelRow}>
         <div className={styles.yearLabel}>{chineseYearLabel}</div>
         <Link className={styles.summaryLink} href={`/cerement/summary/${year}`}>
-          View annual summary
+          查看年度總結
         </Link>
       </div>
 
