@@ -3,6 +3,12 @@
 ## Purpose
 LCWK Reports is a Next.js App Router application that tracks annual sales, commission, cerement totals, and Hong Kong branch staff sales. It provides monthly entry workflows, annual summaries, and Excel exports for staff to manage reporting data.
 
+## Documentation entry points
+- `README.md` is the primary onboarding doc with portfolio-focused overview, architecture diagram, quick start, environment variables, and deployment steps.
+- `README.md` keeps a centered quick-links row (`Live Site`, `Features`, `Tech Stack`, `Architecture`, `Quick Start`) for fast recruiter navigation, with `Live Site` pointing to `https://www.lcwk.com.hk`.
+- `documentations/overview.md` (this file) is the detailed technical system map for routes, runtime flow, and data model context.
+- `documentations/app/**` contains page/client/API level behavior notes.
+
 ## How the system is linked together
 - UI pages and client components live under `app/` and render the sales, commission, and cerement workflows, plus the overall cerement summary.
 - Client components call API routes under `app/api/**` to read and mutate data (including month-end cerement totals, HK branch yearly tables, plus the cerement, commission, and sales years lists).
